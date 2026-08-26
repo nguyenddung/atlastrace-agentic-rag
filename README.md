@@ -1,13 +1,15 @@
 # AtlasTrace — Multi-Agent Agentic RAG Decision Room
 
-An evidence-first Agentic RAG system that turns a contested business decision into an **auditable answer**: every recommendation shows the queries that were planned, the passages that were retrieved, the critique that rejected weak coverage, and the source behind each claim.
+An evidence-first Agentic RAG system that turns a contested business decision into an **auditable answer**: every recommendation shows the queries that were planned, the passages that were retrieved, the critique that rejected weak coverage, and the source behind each claim. The whole product runs in **English and Vietnamese** — including retrieval.
 
 [![CI](https://github.com/nguyenddung/RAG/actions/workflows/ci.yml/badge.svg)](https://github.com/nguyenddung/RAG/actions/workflows/ci.yml)
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-1a7f5a.svg)](LICENSE)
 
-**[Live demo](https://atlastrace-agentic-rag.vercel.app)** · [The problem](#the-problem) · [Architecture](#architecture) · [Run locally](#run-locally) · [Deploy](#deploy-to-vercel)
+[The problem](#the-problem) · [Architecture](#architecture) · [Run locally](#run-locally) · [Deploy](#deploy-to-vercel)
+
+> **Live demo:** deploy in one click — see [Deploy to Vercel](#deploy-to-vercel). Demo mode needs no API keys, so the deployed URL works immediately.
 
 ---
 
@@ -69,8 +71,42 @@ Live mode degrades gracefully: any gateway error is caught, the deterministic pi
 - Corrective critique loop with explicit counter-evidence coverage
 - Clickable source-level citations with `support` / `context` / `risk` stance labels
 - Graceful degradation from Live AI to a deterministic pipeline
+- Fully bilingual EN/VI — interface, answers, evidence ledger **and retrieval**
 - Typed API boundary with Zod validation, unit tests, CI, and production deployment
 - Responsive down to mobile
+
+## Bilingual, including retrieval
+
+Translating the interface is the easy half. The hard half is that **BM25 scores exact terms**, so a Vietnamese question against an English corpus retrieves noise — a language toggle that only relabels buttons would quietly produce worse answers in one of its two languages.
+
+Three approaches were available:
+
+| Approach | Why not |
+| --- | --- |
+| Translate the corpus | Breaks lexical scoring — you cannot BM25 a Vietnamese query against Vietnamese text and an English query against English text from one index |
+| Add a second multilingual embedding index | Real answer at scale, but a heavy dependency for an 8-document corpus, and it drops the deterministic zero-key demo |
+| Bridge the query into one concept space | Keeps a single index, stays deterministic, and is honest about its limits |
+
+AtlasTrace takes the third. `lib/rag/language-bridge.ts` folds Vietnamese tone marks and the `đ` glyph, then maps decision vocabulary onto the English concepts the retriever already indexes:
+
+```
+"triển khai"  → rollout deploy launch
+"chi phí"     → cost investment
+"kiểm soát"   → control governance oversight
+```
+
+Mappings are multi-syllable phrases only — a lone Vietnamese syllable is far too ambiguous to map safely. An English question contains no Vietnamese phrase, so it is bridged to itself unchanged and existing behaviour is untouched.
+
+What is localized where:
+
+| Layer | Language handling |
+| --- | --- |
+| Retrieval index (`lib/rag/corpus.ts`) | Stays English — this is what BM25 scores |
+| Query | Bridged into the English concept space before tokenizing |
+| Evidence ledger, answers, verdicts, agent traces | Rendered from the reader's locale |
+| Interface strings | `lib/i18n/dictionary.ts`, one typed dictionary per locale |
+
+Both locales are server-rendered on first load, so the toggle is instant. Once the reader asks their own question, switching language re-runs it rather than showing a stale answer in the wrong language.
 
 ## Architecture
 
@@ -84,12 +120,17 @@ components/
 └── research-studio.tsx         # the observable decision room
 lib/
 ├── agents/research-team.ts     # planner, critic, synthesizer, orchestration
+├── i18n/
+│   ├── locale.ts               # Locale type and guards
+│   ├── dictionary.ts           # typed EN/VI interface strings
+│   └── corpus-vi.ts            # Vietnamese presentation layer for the corpus
 └── rag/
-    ├── corpus.ts               # synthetic Northstar knowledge base (8 docs)
+    ├── corpus.ts               # synthetic Northstar knowledge base (8 docs, English)
     ├── retrieval.ts            # BM25 + feature-hashed vectors + RRF
-    ├── deterministic.ts        # no-key pipeline + planning contract
+    ├── language-bridge.ts      # Vietnamese → English concept bridge
+    ├── deterministic.ts        # no-key pipeline, planning and classification
     ├── types.ts                # shared pipeline types
-    └── retrieval.test.ts       # retrieval and citation invariants
+    └── retrieval.test.ts       # retrieval, citation and cross-lingual invariants
 ```
 
 The corpus is deliberately **synthetic**. It models a realistic internal knowledge base without exposing proprietary information or implying that the company, metrics or documents are real.
@@ -100,11 +141,12 @@ The corpus is deliberately **synthetic**. It models a realistic internal knowled
 POST /api/research
 Content-Type: application/json
 
-{ "question": "Should Northstar roll out predictive maintenance across its EU fleet?",
-  "mode": "demo" }
+{ "question": "Northstar có nên triển khai bảo trì dự đoán cho toàn đội xe EU không?",
+  "mode": "demo",
+  "locale": "vi" }
 ```
 
-`question` must be 12–500 characters. `mode` is `"demo"` or `"live"`. The response is a `ResearchResult`: answer, confidence, planned queries, citations, per-agent trace and pipeline metrics.
+`question` must be 12–500 characters. `mode` is `"demo"` or `"live"`. `locale` is `"en"` or `"vi"` and defaults to `"en"`. The response is a `ResearchResult`: verdict, answer, confidence, planned queries, citations, per-agent trace and pipeline metrics — all in the requested locale. Validation errors come back localized too.
 
 ## Run locally
 
@@ -144,6 +186,10 @@ The automated suite protects four invariants that matter more than snapshot test
 2. Retrieval surfaces both supporting evidence and counter-evidence.
 3. **Every rendered citation exists in the evidence ledger** — no fabricated document IDs.
 4. Production-control questions return control-specific evidence.
+5. A Vietnamese question classifies identically to its English twin.
+6. The bridge is load-bearing: raw Vietnamese tokens carry nothing the English index can score, bridged tokens do.
+7. A Vietnamese question retrieves substantially the same evidence, with both supporting and counter-evidence present.
+8. Localized runs keep verdict, answer, ledger and agent trace in one language, with citations still valid.
 
 The UI surfaces the metrics that would become an offline evaluation set in a production system: evidence coverage, source diversity, citation validity, corrective rounds, grounded confidence and end-to-end latency.
 
@@ -162,12 +208,13 @@ Every push to `main` then ships a new production deployment.
 
 - **In-memory corpus.** Deliberate, so the demo runs anywhere with zero setup. A production version would ingest versioned documents into Postgres/pgvector or a managed vector store behind the same `retrieveHybrid` interface.
 - **Feature-hashed vectors.** Concept expansion plus feature hashing keeps the demo deterministic and dependency-light. Real embeddings drop in behind the same retriever interface without touching the agents.
+- **The bridge is a dictionary, not a translator.** It covers the decision vocabulary this corpus is about. Vietnamese outside that domain falls back to whatever tokens survive, and the honest fix at scale is a multilingual embedding index behind the same `retrieveHybrid` interface.
 - **No rate limiting yet.** Public Live AI should add durable rate limiting and per-session budgets before taking real traffic.
 - **Next evaluation milestone.** A labeled decision-query set scored on retrieval recall@k, citation precision, faithfulness and answer completeness.
 
 ## Summary
 
-> Built and deployed a multi-agent Agentic RAG decision-support system with Next.js, the Vercel AI SDK and AI Gateway. Implemented query planning, BM25/vector hybrid retrieval with reciprocal rank fusion, an evidence-critique retry loop, grounded synthesis with citation auditing, deterministic fallback, and an observable UI — with strict TypeScript, unit tests and CI.
+> Built and deployed a multi-agent Agentic RAG decision-support system with Next.js, the Vercel AI SDK and AI Gateway. Implemented query planning, BM25/vector hybrid retrieval with reciprocal rank fusion, an evidence-critique retry loop, grounded synthesis with citation auditing, deterministic fallback, cross-lingual EN/VI retrieval, and an observable UI — with strict TypeScript, unit tests and CI.
 
 ## License
 

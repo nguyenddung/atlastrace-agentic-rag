@@ -47,8 +47,13 @@ button { color: inherit; }
 .topbar nav { display: flex; gap: 34px; }
 .topbar nav a { color: #51605b; font-size: 13px; text-decoration: none; }
 .topbar nav a:hover { color: var(--ink); }
-.system-status { align-items: center; display: flex; font-family: var(--font-geist-mono); font-size: 10px; gap: 8px; justify-self: end; letter-spacing: .08em; text-transform: uppercase; }
+.topbar-end { align-items: center; display: flex; gap: 16px; justify-self: end; }
+.system-status { align-items: center; display: flex; font-family: var(--font-geist-mono); font-size: 10px; gap: 8px; letter-spacing: .08em; text-transform: uppercase; }
 .system-status i { background: #30a46c; border: 3px solid #cbe9da; border-radius: 50%; height: 10px; width: 10px; }
+.lang-switch { background: #e9ede7; border: 1px solid #c8d2cc; border-radius: 3px; display: flex; padding: 2px; }
+.lang-switch button { background: transparent; border: 0; border-radius: 2px; color: #5c6964; cursor: pointer; font-family: var(--font-geist-mono); font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 5px 9px; }
+.lang-switch button:hover { color: var(--ink); }
+.lang-switch button.active { background: var(--ink); color: var(--white); }
 
 .hero, .workspace-section, .architecture { margin: 0 auto; max-width: 1440px; padding-left: 44px; padding-right: 44px; }
 .hero { padding-bottom: 48px; padding-top: 82px; }
@@ -188,7 +193,7 @@ footer p, footer > span { color: #8f9b96; font-size: 10px; } footer > span { fon
 }
 
 @media (max-width: 760px) {
-  .topbar { grid-template-columns: 1fr auto; height: 62px; padding: 0 18px; }.topbar nav { display: none; }.brand small { display: none; }
+  .topbar { grid-template-columns: 1fr auto; height: 62px; padding: 0 18px; }.topbar nav { display: none; }.brand small { display: none; }.system-status { display: none; }.topbar-end { gap: 0; }
   .hero, .workspace-section, .architecture { padding-left: 18px; padding-right: 18px; }.hero { padding-top: 52px; }
   .hero-grid { grid-template-columns: 1fr; }.pain-card { margin-top: 8px; transform: none; }
   h1 { font-size: 46px; }.hero-copy { font-size: 15px; }.solution-strip { align-items: start; flex-direction: column; gap: 15px; margin-top: 56px; }.solution-strip div { flex-wrap: wrap; gap: 8px; }

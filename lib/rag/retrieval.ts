@@ -1,4 +1,5 @@
 import { knowledgeBase, type KnowledgeDocument } from "./corpus";
+import { bridgeToEnglish, deaccent } from "./language-bridge";
 
 const stopWords = new Set(["a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "how", "in", "is", "it", "of", "on", "or", "should", "the", "to", "what", "with"]);
 
@@ -23,17 +24,20 @@ export type RetrievedDocument = KnowledgeDocument & {
 };
 
 export function tokenize(value: string) {
-  return value
-    .toLowerCase()
-    .normalize("NFKD")
+  return deaccent(value.toLowerCase())
     .replace(/[^a-z0-9€%]+/g, " ")
     .trim()
     .split(/\s+/)
     .filter((token) => token.length > 1 && !stopWords.has(token));
 }
 
-function expandedTokens(value: string) {
-  const base = tokenize(value);
+/**
+ * Query-side expansion: Vietnamese phrases are bridged into English concepts
+ * first, then the existing English concept map widens the result. Document-side
+ * calls pass English text, for which the bridge is a no-op.
+ */
+export function expandedTokens(value: string) {
+  const base = tokenize(bridgeToEnglish(value));
   return [...base, ...base.flatMap((token) => concepts[token] ?? [])];
 }
 

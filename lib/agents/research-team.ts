@@ -1,7 +1,9 @@
 import { Output, ToolLoopAgent } from "ai";
 import { z } from "zod";
+import { corpusVi } from "@/lib/i18n/corpus-vi";
+import { defaultLocale, type Locale } from "@/lib/i18n/locale";
 import { knowledgeBase } from "@/lib/rag/corpus";
-import { runDeterministicResearch } from "@/lib/rag/deterministic";
+import { classifyQuestion, runDeterministicResearch } from "@/lib/rag/deterministic";
 import { retrieveHybrid } from "@/lib/rag/retrieval";
 import type { AgentTrace, Citation, ResearchResult } from "@/lib/rag/types";
 
@@ -42,9 +44,29 @@ const critic = new ToolLoopAgent({
 
 const synthesizer = new ToolLoopAgent({
   model: MODEL_ID,
-  instructions: "You are a grounded answer synthesizer. Answer the question directly, distinguish evidence from recommendations, mention uncertainty, and cite every material claim with the exact format [DOC-ID]. Use only the supplied evidence.",
+  instructions:
+    "You are a grounded answer synthesizer. Answer the question directly, distinguish evidence from recommendations, mention uncertainty, and cite every material claim with the exact format [DOC-ID]. Use only the supplied evidence. Write the answer in the language named by the ANSWER LANGUAGE field of the prompt, keeping document IDs verbatim.",
   output: Output.object({ schema: answerSchema }),
 });
+
+const liveVerdicts: Record<Locale, Record<ReturnType<typeof classifyQuestion>, string>> = {
+  en: {
+    controls: "Require five production gates before rollout.",
+    segment: "Prioritize refrigerated fleets in Germany and the Netherlands.",
+    maintenance: "Proceed with a gated, refrigeration-first rollout.",
+    generic: "Use a controlled rollout with explicit evidence gates.",
+  },
+  vi: {
+    controls: "Yêu cầu năm cổng kiểm soát trước khi đưa vào vận hành.",
+    segment: "Ưu tiên đội xe đông lạnh tại Đức và Hà Lan.",
+    maintenance: "Triển khai theo cổng duyệt, ưu tiên xe đông lạnh trước.",
+    generic: "Triển khai có kiểm soát với các cổng bằng chứng rõ ràng.",
+  },
+};
+
+function verdictFor(question: string, locale: Locale) {
+  return (liveVerdicts[locale] ?? liveVerdicts.en)[classifyQuestion(question)];
+}
 
 function now() {
   return performance.now();
@@ -58,7 +80,7 @@ function formatEvidence(items: ReturnType<typeof retrieveHybrid>) {
   return items.map((item) => `ID: ${item.id}\nTITLE: ${item.title}\nSOURCE: ${item.source}\nSTANCE: ${item.stance}\nTEXT: ${item.text}`).join("\n\n---\n\n");
 }
 
-export async function runLiveResearch(question: string): Promise<ResearchResult> {
+export async function runLiveResearch(question: string, locale: Locale = defaultLocale): Promise<ResearchResult> {
   const pipelineStarted = now();
   const trace: AgentTrace[] = [];
   trace.push({ agent: "Orchestrator", detail: "Routed the decision query to a three-agent research team.", durationMs: 12, status: "complete" });
@@ -92,25 +114,30 @@ export async function runLiveResearch(question: string): Promise<ResearchResult>
   const groundedEvidence = accepted.length >= 2 ? accepted : evidence.slice(0, 5);
   const synthesizerStarted = now();
   const answerResult = await synthesizer.generate({
-    prompt: `QUESTION:\n${question}\n\nEVIDENCE:\n${formatEvidence(groundedEvidence)}\n\nCRITIC NOTE:\n${critique.critique}`,
+    prompt: `ANSWER LANGUAGE:\n${locale === "vi" ? "Vietnamese" : "English"}\n\nQUESTION:\n${question}\n\nEVIDENCE:\n${formatEvidence(groundedEvidence)}\n\nCRITIC NOTE:\n${critique.critique}`,
   });
   const synthesis = answerResult.output;
   trace.push({ agent: "Answer Synthesizer", detail: `Produced a grounded answer with ${synthesis.citedIds.length} citations.`, durationMs: elapsed(synthesizerStarted), status: "complete" });
 
   const cited = groundedEvidence.filter((item) => synthesis.citedIds.includes(item.id));
   const citationSource = cited.length >= 2 ? cited : groundedEvidence;
-  const citations: Citation[] = citationSource.slice(0, 6).map((item) => ({
-    id: item.id,
-    title: item.title,
-    source: item.source,
-    excerpt: item.text,
-    score: Math.round(item.fused * 100),
-    stance: item.stance,
-  }));
+  const citations: Citation[] = citationSource.slice(0, 6).map((item) => {
+    const translated = locale === "vi" ? corpusVi[item.id] : undefined;
+    return {
+      id: item.id,
+      title: translated?.title ?? item.title,
+      source: translated?.source ?? item.source,
+      excerpt: translated?.text ?? item.text,
+      score: Math.round(item.fused * 100),
+      stance: item.stance,
+    };
+  });
 
   return {
     question,
+    locale,
     mode: "live",
+    verdict: verdictFor(question, locale),
     answer: synthesis.answer,
     confidence: Math.round((synthesis.confidence + critique.confidence) / 2),
     queries: plan.queries,
@@ -125,14 +152,14 @@ export async function runLiveResearch(question: string): Promise<ResearchResult>
   };
 }
 
-export async function runResearch(question: string, requestedMode: "demo" | "live") {
-  if (requestedMode === "demo") return runDeterministicResearch(question);
+export async function runResearch(question: string, requestedMode: "demo" | "live", locale: Locale = defaultLocale) {
+  if (requestedMode === "demo") return runDeterministicResearch(question, locale);
 
   try {
-    return await runLiveResearch(question);
+    return await runLiveResearch(question, locale);
   } catch (error) {
     const reason = error instanceof Error ? error.message.slice(0, 180) : "AI Gateway was unavailable";
-    return runDeterministicResearch(question, reason);
+    return runDeterministicResearch(question, locale, reason);
   }
 }
 

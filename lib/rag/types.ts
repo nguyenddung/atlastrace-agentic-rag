@@ -1,3 +1,5 @@
+import type { Locale } from "@/lib/i18n/locale";
+
 export type AgentName = "Orchestrator" | "Query Planner" | "Hybrid Retriever" | "Evidence Critic" | "Answer Synthesizer";
 
 export type AgentTrace = {
@@ -18,7 +20,10 @@ export type Citation = {
 
 export type ResearchResult = {
   question: string;
+  locale: Locale;
   mode: "demo" | "live" | "fallback";
+  /** One-line headline rendered above the answer body, decided server-side. */
+  verdict: string;
   answer: string;
   confidence: number;
   queries: string[];
@@ -32,4 +37,3 @@ export type ResearchResult = {
   };
   fallbackReason?: string;
 };
-
