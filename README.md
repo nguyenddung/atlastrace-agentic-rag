@@ -7,9 +7,9 @@ An evidence-first Agentic RAG system that turns a contested business decision in
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-1a7f5a.svg)](LICENSE)
 
-[The problem](#the-problem) · [Architecture](#architecture) · [Run locally](#run-locally) · [Deploy](#deploy-to-vercel)
+**[Live demo](https://atlastrace-ten.vercel.app)** · [The problem](#the-problem) · [Architecture](#architecture) · [Run locally](#run-locally) · [Deploy](#deploy-to-vercel)
 
-> **Live demo:** deploy in one click — see [Deploy to Vercel](#deploy-to-vercel). Demo mode needs no API keys, so the deployed URL works immediately.
+> The live demo runs in Demo mode, so it needs no API keys and never hits a quota — open it and ask a question in English or Vietnamese.
 
 ---
 
@@ -196,6 +196,8 @@ The UI surfaces the metrics that would become an offline evaluation set in a pro
 `.github/workflows/ci.yml` runs typecheck, tests, lint and build on every push and pull request.
 
 ## Deploy to Vercel
+
+This repository is deployed at **[atlastrace-ten.vercel.app](https://atlastrace-ten.vercel.app)**. To deploy your own copy:
 
 1. Push this repository to GitHub.
 2. In Vercel, **Add New → Project** and import `nguyenddung/RAG`.
