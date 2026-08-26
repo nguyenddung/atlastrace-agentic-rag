@@ -1,0 +1,25 @@
+# dependencies
+/node_modules
+/.npm-cache
+
+# next.js
+/.next
+/out
+
+# production build info
+*.tsbuildinfo
+
+# local env
+.env*
+!.env.example
+
+# vercel
+.vercel
+
+# generated workspace folders
+/work
+/outputs
+
+# misc
+*.log
+.DS_Store
