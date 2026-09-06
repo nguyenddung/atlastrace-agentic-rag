@@ -1,5 +1,7 @@
 # AtlasTrace — Multi-Agent Agentic RAG Decision Room
 
+🇻🇳 [Đọc bằng tiếng Việt](README.vi.md)
+
 An evidence-first Agentic RAG system that turns a contested business decision into an **auditable answer**: every recommendation shows the queries that were planned, the passages that were retrieved, the critique that rejected weak coverage, and the source behind each claim. The whole product runs in **English and Vietnamese** — including retrieval.
 
 [![CI](https://github.com/nguyenddung/RAG/actions/workflows/ci.yml/badge.svg)](https://github.com/nguyenddung/RAG/actions/workflows/ci.yml)
@@ -90,7 +92,7 @@ Three approaches were available:
 
 AtlasTrace takes the third. `lib/rag/language-bridge.ts` folds Vietnamese tone marks and the `đ` glyph, then maps decision vocabulary onto the English concepts the retriever already indexes:
 
-```
+```text
 "triển khai"  → rollout deploy launch
 "chi phí"     → cost investment
 "kiểm soát"   → control governance oversight
