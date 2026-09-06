@@ -4,7 +4,7 @@
 
 An evidence-first Agentic RAG system that turns a contested business decision into an **auditable answer**: every recommendation shows the queries that were planned, the passages that were retrieved, the critique that rejected weak coverage, and the source behind each claim. The whole product runs in **English and Vietnamese** — including retrieval.
 
-[![CI](https://github.com/nguyenddung/RAG/actions/workflows/ci.yml/badge.svg)](https://github.com/nguyenddung/RAG/actions/workflows/ci.yml)
+[![CI](https://github.com/nguyenddung/atlastrace-agentic-rag/actions/workflows/ci.yml/badge.svg)](https://github.com/nguyenddung/atlastrace-agentic-rag/actions/workflows/ci.yml)
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-1a7f5a.svg)](LICENSE)
@@ -167,8 +167,8 @@ Content-Type: application/json
 ## Run locally
 
 ```bash
-git clone https://github.com/nguyenddung/RAG.git
-cd RAG
+git clone https://github.com/nguyenddung/atlastrace-agentic-rag.git
+cd atlastrace-agentic-rag
 npm install
 npm run dev
 ```
@@ -216,7 +216,7 @@ The UI surfaces the metrics that would become an offline evaluation set in a pro
 This repository is deployed at **[atlastrace-ten.vercel.app](https://atlastrace-ten.vercel.app)**. To deploy your own copy:
 
 1. Push this repository to GitHub.
-2. In Vercel, **Add New → Project** and import `nguyenddung/RAG`.
+2. In Vercel, **Add New → Project** and import `nguyenddung/atlastrace-agentic-rag`.
 3. Accept the detected Next.js settings — no environment variables are needed for Demo mode.
 4. For Live AI, enable AI Gateway on the project; deployments authenticate via OIDC, so no key needs to be stored.
 
@@ -238,7 +238,7 @@ Every push to `main` then ships a new production deployment.
 
 If this project is useful to you, a star helps others find it.
 
-[![Star History Chart](https://api.star-history.com/svg?repos=nguyenddung/RAG&type=Date)](https://star-history.com/#nguyenddung/RAG&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=nguyenddung/atlastrace-agentic-rag&type=Date)](https://star-history.com/#nguyenddung/atlastrace-agentic-rag&Date)
 
 ## License
 

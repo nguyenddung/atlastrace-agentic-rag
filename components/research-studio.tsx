@@ -123,7 +123,7 @@ export function ResearchStudio({ initialResults }: { initialResults: Record<Loca
         <nav aria-label="AtlasTrace">
           <a href="#decision-room">{d.navDecisionRoom}</a>
           <a href="#architecture">{d.navArchitecture}</a>
-          <a href="https://github.com/nguyenddung/RAG" target="_blank" rel="noreferrer">{d.navSource} ↗</a>
+          <a href="https://github.com/nguyenddung/atlastrace-agentic-rag" target="_blank" rel="noreferrer">{d.navSource} ↗</a>
         </nav>
         <div className="topbar-end">
           <div className="lang-switch" role="group" aria-label={d.switchLanguage}>

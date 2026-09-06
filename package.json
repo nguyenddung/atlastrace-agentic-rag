@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nguyenddung/RAG.git"
+    "url": "git+https://github.com/nguyenddung/atlastrace-agentic-rag.git"
   },
   "engines": {
     "node": ">=20.9.0"

@@ -4,7 +4,7 @@
 
 Một hệ thống Agentic RAG lấy bằng chứng làm gốc, biến một quyết định kinh doanh nhiều tranh cãi thành **câu trả lời có thể kiểm chứng**: mọi khuyến nghị đều hiển thị các truy vấn đã được lập kế hoạch, các đoạn tài liệu đã được truy hồi, lượt phản biện đã loại bỏ bằng chứng yếu, và nguồn gốc đứng sau từng luận điểm. Toàn bộ sản phẩm chạy được bằng **cả tiếng Anh lẫn tiếng Việt** — kể cả ở khâu truy hồi dữ liệu.
 
-[![CI](https://github.com/nguyenddung/RAG/actions/workflows/ci.yml/badge.svg)](https://github.com/nguyenddung/RAG/actions/workflows/ci.yml)
+[![CI](https://github.com/nguyenddung/atlastrace-agentic-rag/actions/workflows/ci.yml/badge.svg)](https://github.com/nguyenddung/atlastrace-agentic-rag/actions/workflows/ci.yml)
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-1a7f5a.svg)](LICENSE)
@@ -167,8 +167,8 @@ Content-Type: application/json
 ## Chạy ở máy local
 
 ```bash
-git clone https://github.com/nguyenddung/RAG.git
-cd RAG
+git clone https://github.com/nguyenddung/atlastrace-agentic-rag.git
+cd atlastrace-agentic-rag
 npm install
 npm run dev
 ```
@@ -216,7 +216,7 @@ Giao diện hiển thị đúng những chỉ số mà một hệ thống produc
 Repository này đang được triển khai tại **[atlastrace-ten.vercel.app](https://atlastrace-ten.vercel.app)**. Để triển khai bản của riêng bạn:
 
 1. Push repository này lên GitHub.
-2. Trên Vercel, chọn **Add New → Project** và import `nguyenddung/RAG`.
+2. Trên Vercel, chọn **Add New → Project** và import `nguyenddung/atlastrace-agentic-rag`.
 3. Chấp nhận cấu hình Next.js được tự động phát hiện — không cần biến môi trường nào cho chế độ Demo.
 4. Để dùng AI trực tiếp, bật AI Gateway cho project; các lần deploy sẽ tự xác thực qua OIDC, không cần lưu key nào cả.
 
@@ -238,7 +238,7 @@ Mỗi lần push lên `main` sẽ tự động phát hành một bản triển k
 
 Nếu dự án này hữu ích với bạn, một star sẽ giúp người khác tìm thấy nó dễ hơn.
 
-[![Star History Chart](https://api.star-history.com/svg?repos=nguyenddung/RAG&type=Date)](https://star-history.com/#nguyenddung/RAG&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=nguyenddung/atlastrace-agentic-rag&type=Date)](https://star-history.com/#nguyenddung/atlastrace-agentic-rag&Date)
 
 ## Giấy phép
 
