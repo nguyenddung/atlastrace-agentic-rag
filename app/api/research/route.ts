@@ -2,6 +2,7 @@ import { z } from "zod";
 import { runResearch } from "@/lib/agents/research-team";
 import { getDictionary } from "@/lib/i18n/dictionary";
 import { defaultLocale, locales } from "@/lib/i18n/locale";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
@@ -17,8 +18,22 @@ function localeFromRequest(body: unknown) {
   return locales.find((value) => value === candidate) ?? defaultLocale;
 }
 
+/** Vercel sets x-forwarded-for; local dev and other hosts fall back to a shared bucket. */
+function clientKey(request: Request) {
+  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+}
+
 export async function POST(request: Request) {
   let body: unknown = null;
+
+  const rateLimit = checkRateLimit(clientKey(request));
+  if (!rateLimit.allowed) {
+    const dictionary = getDictionary(defaultLocale);
+    return Response.json(
+      { error: dictionary.errorRateLimited },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(rateLimit.retryAfterMs / 1000)) } },
+    );
+  }
 
   try {
     body = await request.json();

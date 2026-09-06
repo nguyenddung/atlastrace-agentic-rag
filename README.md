@@ -74,6 +74,7 @@ Live mode degrades gracefully: any gateway error is caught, the deterministic pi
 - Fully bilingual EN/VI — interface, answers, evidence ledger **and retrieval**
 - Typed API boundary with Zod validation, unit tests, CI, and production deployment
 - Responsive down to mobile
+- Per-IP rate limiting on the research endpoint, plus generated favicon, OG image, robots.txt and sitemap
 
 ## Bilingual, including retrieval
 
@@ -112,14 +113,18 @@ Both locales are server-rendered on first load, so the toggle is instant. Once t
 
 ```text
 app/
-├── api/research/route.ts       # Zod-validated research endpoint (POST)
+├── api/research/route.ts       # Zod-validated, rate-limited research endpoint (POST)
 ├── layout.tsx                  # metadata, fonts
 ├── page.tsx                    # server-rendered initial decision
+├── icon.tsx / opengraph-image.tsx  # generated favicon and social preview image
+├── robots.ts / sitemap.ts      # generated SEO files
 └── globals.css                 # design system
 components/
 └── research-studio.tsx         # the observable decision room
 lib/
 ├── agents/research-team.ts     # planner, critic, synthesizer, orchestration
+├── rate-limit.ts                # in-memory per-IP fixed-window limiter
+├── site.ts                      # canonical site URL, shared by metadata/robots/sitemap
 ├── i18n/
 │   ├── locale.ts               # Locale type and guards
 │   ├── dictionary.ts           # typed EN/VI interface strings
@@ -146,7 +151,7 @@ Content-Type: application/json
   "locale": "vi" }
 ```
 
-`question` must be 12–500 characters. `mode` is `"demo"` or `"live"`. `locale` is `"en"` or `"vi"` and defaults to `"en"`. The response is a `ResearchResult`: verdict, answer, confidence, planned queries, citations, per-agent trace and pipeline metrics — all in the requested locale. Validation errors come back localized too.
+`question` must be 12–500 characters. `mode` is `"demo"` or `"live"`. `locale` is `"en"` or `"vi"` and defaults to `"en"`. The response is a `ResearchResult`: verdict, answer, confidence, planned queries, citations, per-agent trace and pipeline metrics — all in the requested locale. Validation errors come back localized too. Requests are rate-limited per IP (20/min); an exceeded limit returns `429` with a `Retry-After` header.
 
 ## Run locally
 
@@ -211,7 +216,7 @@ Every push to `main` then ships a new production deployment.
 - **In-memory corpus.** Deliberate, so the demo runs anywhere with zero setup. A production version would ingest versioned documents into Postgres/pgvector or a managed vector store behind the same `retrieveHybrid` interface.
 - **Feature-hashed vectors.** Concept expansion plus feature hashing keeps the demo deterministic and dependency-light. Real embeddings drop in behind the same retriever interface without touching the agents.
 - **The bridge is a dictionary, not a translator.** It covers the decision vocabulary this corpus is about. Vietnamese outside that domain falls back to whatever tokens survive, and the honest fix at scale is a multilingual embedding index behind the same `retrieveHybrid` interface.
-- **No rate limiting yet.** Public Live AI should add durable rate limiting and per-session budgets before taking real traffic.
+- **Rate limiting is in-memory, not durable.** `/api/research` enforces a per-IP fixed window (`lib/rate-limit.ts`), but state resets on cold start and is not shared across serverless instances. It blunts casual abuse of the public demo; real production traffic needs a durable, shared store (Vercel KV, Upstash) behind the same interface.
 - **Next evaluation milestone.** A labeled decision-query set scored on retrieval recall@k, citation precision, faithfulness and answer completeness.
 
 ## Summary

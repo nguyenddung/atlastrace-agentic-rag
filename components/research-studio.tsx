@@ -202,15 +202,15 @@ export function ResearchStudio({ initialResults }: { initialResults: Record<Loca
               ))}
             </div>
             <div className="mode-switch" role="group" aria-label={d.modeGroup}>
-              <button type="button" className={mode === "demo" ? "active" : ""} onClick={() => setMode("demo")}>{d.modeDemo}</button>
-              <button type="button" className={mode === "live" ? "active" : ""} onClick={() => setMode("live")}><i /> {d.modeLive}</button>
+              <button type="button" className={mode === "demo" ? "active" : ""} aria-pressed={mode === "demo"} onClick={() => setMode("demo")}>{d.modeDemo}</button>
+              <button type="button" className={mode === "live" ? "active" : ""} aria-pressed={mode === "live"} onClick={() => setMode("live")}><i /> {d.modeLive}</button>
             </div>
           </div>
         </form>
 
-        {error && <div className="error-banner">{error}</div>}
+        {error && <div className="error-banner" role="alert">{error}</div>}
         {result.mode === "fallback" && (
-          <div className="fallback-banner"><strong>{d.fallbackTitle}</strong><span>{d.fallbackBody}</span></div>
+          <div className="fallback-banner" role="status"><strong>{d.fallbackTitle}</strong><span>{d.fallbackBody}</span></div>
         )}
 
         <div className={`decision-grid ${loading ? "is-loading" : ""}`}>

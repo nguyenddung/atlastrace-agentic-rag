@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const geist = Geist({
@@ -12,20 +13,23 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null) ??
-  "https://atlastrace-ten.vercel.app";
+const title = "AtlasTrace — Multi-Agent RAG Studio";
+const description =
+  "An evidence-first Agentic RAG portfolio project with planning, hybrid retrieval, critique loops, and grounded synthesis.";
 
 export const metadata: Metadata = {
-  title: "AtlasTrace — Multi-Agent RAG Studio",
-  description:
-    "An evidence-first Agentic RAG portfolio project with planning, hybrid retrieval, critique loops, and grounded synthesis.",
+  title,
+  description,
   metadataBase: new URL(siteUrl),
   openGraph: {
-    title: "AtlasTrace — Multi-Agent RAG Studio",
+    title,
     description: "Watch four specialized agents turn a question into a cited answer.",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description: "Watch four specialized agents turn a question into a cited answer.",
   },
 };
 

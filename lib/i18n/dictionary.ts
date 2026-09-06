@@ -55,6 +55,7 @@ const en = {
     "The deterministic retrieval pipeline completed this run because the model gateway was unavailable.",
   errorGeneric: "Research run failed",
   errorLength: "Ask a specific question between 12 and 500 characters.",
+  errorRateLimited: "Too many requests. Wait a moment before running another query.",
 
   agentActivity: "Agent activity",
   handoffs: "handoffs",
@@ -185,6 +186,7 @@ const vi: Dictionary = {
     "Pipeline truy hồi tất định đã hoàn tất lượt chạy này vì cổng mô hình không khả dụng.",
   errorGeneric: "Lượt nghiên cứu thất bại",
   errorLength: "Hãy đặt câu hỏi cụ thể, dài từ 12 đến 500 ký tự.",
+  errorRateLimited: "Quá nhiều yêu cầu. Hãy đợi một chút rồi chạy lại truy vấn.",
 
   agentActivity: "Hoạt động tác tử",
   handoffs: "lượt bàn giao",
