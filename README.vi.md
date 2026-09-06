@@ -9,7 +9,7 @@ Một hệ thống Agentic RAG lấy bằng chứng làm gốc, biến một quy
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-1a7f5a.svg)](LICENSE)
 
-**[Xem demo trực tiếp](https://atlastrace-ten.vercel.app)** · [Vấn đề](#vấn-đề) · [Kiến trúc](#kiến-trúc) · [Chạy ở máy local](#chạy-ở-máy-local) · [Triển khai](#triển-khai-lên-vercel)
+**[Xem demo trực tiếp](https://atlastrace-ten.vercel.app)** · [Vấn đề](#vấn-đề) · [Kiến trúc](#kiến-trúc) · [Nguồn dữ liệu](#nguồn-dữ-liệu) · [Chạy ở máy local](#chạy-ở-máy-local) · [Triển khai](#triển-khai-lên-vercel)
 
 > Bản demo trực tiếp chạy ở chế độ Demo, nên không cần API key và không bao giờ hết quota — hãy mở link và đặt câu hỏi bằng tiếng Anh hoặc tiếng Việt.
 
@@ -142,6 +142,15 @@ lib/
 
 Kho tài liệu được thiết kế **tổng hợp một cách có chủ đích**. Nó mô phỏng một kho tri thức nội bộ thực tế mà không để lộ thông tin độc quyền hay ngụ ý rằng công ty, số liệu hoặc tài liệu là có thật.
 
+## Nguồn dữ liệu
+
+Dự án này **không** gọi tới bất kỳ dataset ngoài, database hay trình thu thập dữ liệu (scraper) nào cả. Toàn bộ kho tri thức là một tập tài liệu tổng hợp, do chính tay viết ra và nằm sẵn ngay trong repo:
+
+- [`lib/rag/corpus.ts`](lib/rag/corpus.ts) — 8 tài liệu tiếng Anh (`OPS-17`, `FIN-08`, `RISK-12`, `LEGAL-04`, `ENG-23`, `DATA-05`, `SRE-19`, `PEOPLE-03`), mỗi tài liệu có id, tiêu đề, nguồn, ngày tháng, tag, lập trường `support` / `context` / `risk` và một đoạn văn bản. Đây chính xác là mảng dữ liệu mà `retrieveHybrid` đánh chỉ mục và chấm điểm — không có gì được gọi qua mạng lúc runtime cả.
+- [`lib/i18n/corpus-vi.ts`](lib/i18n/corpus-vi.ts) — bản dịch tiếng Việt của đúng 8 tài liệu đó, dùng chung id. File này chỉ dùng để hiển thị: việc chấm điểm truy hồi luôn chạy trên văn bản tiếng Anh ở trên, file này chỉ đổi những gì người đọc tiếng Việt nhìn thấy trong sổ bằng chứng.
+
+Toàn bộ nội dung trong kho tài liệu đều là **hư cấu** — không đại diện cho bất kỳ công ty, nhân viên hay số liệu độc quyền có thật nào; "Northstar" và "FleetSense" là những cái tên được đặt ra cho một kịch bản triển khai bảo trì đội xe hoàn toàn tổng hợp. Muốn trỏ dự án này vào dữ liệu thật, chỉ cần cài đặt một nguồn lưu trữ có cùng chữ ký hàm `retrieveHybrid(question, plannedQueries, limit)` (xem [Đánh đổi kỹ thuật & bước tiếp theo](#đánh-đổi-kỹ-thuật--bước-tiếp-theo)) — các tác tử, API và giao diện đều không cần thay đổi gì.
+
 ### API
 
 ```http
@@ -224,6 +233,12 @@ Mỗi lần push lên `main` sẽ tự động phát hành một bản triển k
 ## Tóm tắt (dùng cho CV)
 
 > Xây dựng và triển khai một hệ thống hỗ trợ ra quyết định Agentic RAG đa tác tử bằng Next.js, Vercel AI SDK và AI Gateway. Cài đặt lập kế hoạch truy vấn, truy hồi lai BM25/vector với reciprocal rank fusion, vòng lặp phản biện-truy hồi lại bằng chứng, tổng hợp câu trả lời có căn cứ kèm kiểm toán trích dẫn, cơ chế dự phòng tất định, truy hồi song ngữ Anh/Việt liên ngôn ngữ, và một giao diện có thể quan sát được toàn bộ quá trình suy luận — cùng với TypeScript strict, unit test và CI.
+
+## Lịch sử star
+
+Nếu dự án này hữu ích với bạn, một star sẽ giúp người khác tìm thấy nó dễ hơn.
+
+[![Star History Chart](https://api.star-history.com/svg?repos=nguyenddung/RAG&type=Date)](https://star-history.com/#nguyenddung/RAG&Date)
 
 ## Giấy phép
 

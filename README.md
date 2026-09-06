@@ -9,7 +9,7 @@ An evidence-first Agentic RAG system that turns a contested business decision in
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-1a7f5a.svg)](LICENSE)
 
-**[Live demo](https://atlastrace-ten.vercel.app)** · [The problem](#the-problem) · [Architecture](#architecture) · [Run locally](#run-locally) · [Deploy](#deploy-to-vercel)
+**[Live demo](https://atlastrace-ten.vercel.app)** · [The problem](#the-problem) · [Architecture](#architecture) · [Data source](#data-source) · [Run locally](#run-locally) · [Deploy](#deploy-to-vercel)
 
 > The live demo runs in Demo mode, so it needs no API keys and never hits a quota — open it and ask a question in English or Vietnamese.
 
@@ -142,6 +142,15 @@ lib/
 
 The corpus is deliberately **synthetic**. It models a realistic internal knowledge base without exposing proprietary information or implying that the company, metrics or documents are real.
 
+## Data source
+
+There is no external dataset, database or scraper behind this project. The entire knowledge base is a small set of hand-authored, synthetic documents checked directly into the repo:
+
+- [`lib/rag/corpus.ts`](lib/rag/corpus.ts) — 8 English documents (`OPS-17`, `FIN-08`, `RISK-12`, `LEGAL-04`, `ENG-23`, `DATA-05`, `SRE-19`, `PEOPLE-03`), each with an id, title, source, date, tags, a `support` / `context` / `risk` stance, and a text passage. This is the exact array that `retrieveHybrid` indexes and scores — nothing is fetched at runtime.
+- [`lib/i18n/corpus-vi.ts`](lib/i18n/corpus-vi.ts) — Vietnamese translations of the same 8 documents, keyed by the same ids. These are display-only: retrieval always scores the English text above, and this file only changes what a Vietnamese reader sees in the evidence ledger.
+
+Everything in the corpus is fictional — no real company, employee or proprietary figure is represented; "Northstar" and "FleetSense" are invented names for a synthetic fleet-maintenance scenario. To point this project at real data, implement a store with the same `retrieveHybrid(question, plannedQueries, limit)` signature (see [Trade-offs and next steps](#trade-offs-and-next-steps)) — the agents, API and UI don't need to change.
+
 ### API
 
 ```http
@@ -224,6 +233,12 @@ Every push to `main` then ships a new production deployment.
 ## Summary
 
 > Built and deployed a multi-agent Agentic RAG decision-support system with Next.js, the Vercel AI SDK and AI Gateway. Implemented query planning, BM25/vector hybrid retrieval with reciprocal rank fusion, an evidence-critique retry loop, grounded synthesis with citation auditing, deterministic fallback, cross-lingual EN/VI retrieval, and an observable UI — with strict TypeScript, unit tests and CI.
+
+## Star history
+
+If this project is useful to you, a star helps others find it.
+
+[![Star History Chart](https://api.star-history.com/svg?repos=nguyenddung/RAG&type=Date)](https://star-history.com/#nguyenddung/RAG&Date)
 
 ## License
 
