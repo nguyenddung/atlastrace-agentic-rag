@@ -1,0 +1,39 @@
+{
+  "n_questions": 1190,
+  "n_passages": 240,
+  "retrieval": {
+    "en": {
+      "recall@1": 0.8815126050420168,
+      "recall@5": 0.9773109243697479,
+      "mrr@10": 0.9224646525276783
+    },
+    "vi": {
+      "recall@1": 0.892436974789916,
+      "recall@5": 0.9697478991596639,
+      "mrr@10": 0.9253968253968258
+    },
+    "vi_en_only": {
+      "recall@1": 0.2815126050420168,
+      "recall@5": 0.4781512605042017,
+      "mrr@10": 0.35896458583433327
+    }
+  },
+  "pipeline": {
+    "en": {
+      "gold_passage_cited_first": 0.9134453781512605,
+      "answer_in_extracted_sentence": 0.7302521008403361,
+      "corrective_loop_rate": 0.3764705882352941,
+      "not_found_rate": 0.03529411764705882,
+      "latency_ms_p50": 9.180853000088973,
+      "latency_ms_p95": 18.017196000073454
+    },
+    "vi": {
+      "gold_passage_cited_first": 0.8579831932773109,
+      "answer_in_extracted_sentence": 0.6907563025210084,
+      "corrective_loop_rate": 0.06890756302521009,
+      "not_found_rate": 0.0008403361344537816,
+      "latency_ms_p50": 10.529501500059268,
+      "latency_ms_p95": 17.781398999886733
+    }
+  }
+}

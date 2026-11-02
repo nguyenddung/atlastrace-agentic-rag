@@ -1,8 +1,8 @@
 {
   "name": "atlastrace-agentic-rag",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Multi-agent Agentic RAG decision room: query planning, hybrid retrieval, an evidence-critique loop and grounded, cited synthesis.",
+  "description": "Bilingual (EN/VI) evidence-first agentic RAG over XQuAD: a Python LangGraph pipeline with a corrective critique loop, audited citations and a Next.js research room.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -13,20 +13,17 @@
   },
   "scripts": {
     "dev": "next dev",
+    "dev:api": ".venv/bin/uvicorn atlastrace.api:app --reload --port 8000",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "verify": "npm run typecheck && npm test && npm run lint && npm run build"
+    "verify": "npm run typecheck && npm run lint && npm run build"
   },
   "dependencies": {
-    "ai": "^7.0.79",
     "next": "^16.3.3",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "zod": "^4.4.3"
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@types/node": "^26.3.0",
@@ -34,7 +31,6 @@
     "@types/react-dom": "^19.2.5",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.3",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.11"
+    "typescript": "^6.0.3"
   }
 }

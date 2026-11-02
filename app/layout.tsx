@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const title = "AtlasTrace — Multi-Agent RAG Studio";
+const title = "AtlasTrace — Bilingual Agentic RAG";
 const description =
-  "An evidence-first Agentic RAG portfolio project with planning, hybrid retrieval, critique loops, and grounded synthesis.";
+  "Evidence-first agentic RAG over XQuAD in English and Vietnamese: a Python LangGraph pipeline with planning, hybrid retrieval, a corrective critique loop and audited citations.";
 
 export const metadata: Metadata = {
   title,
@@ -23,13 +23,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   openGraph: {
     title,
-    description: "Watch four specialized agents turn a question into a cited answer.",
+    description: "Watch a team of agents turn an English or Vietnamese question into a cited answer.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title,
-    description: "Watch four specialized agents turn a question into a cited answer.",
+    description: "Watch a team of agents turn an English or Vietnamese question into a cited answer.",
   },
 };
 
