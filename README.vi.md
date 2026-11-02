@@ -1,83 +1,162 @@
-# AtlasTrace — Agentic RAG Song Ngữ
+<div align="center">
 
-🇬🇧 [Read in English](README.md)
+# AtlasTrace
 
-Một hệ thống agentic RAG lấy bằng chứng làm gốc, trả lời câu hỏi bằng **tiếng Việt và tiếng Anh** trên một bộ dữ liệu công khai thật, và cho thấy toàn bộ quá trình: kế hoạch truy hồi, từng lượt bàn giao giữa các tác tử cùng thời gian đo thật, bước kiểm tra độ phủ của tác tử phản biện, và đoạn văn đứng sau mỗi luận điểm. Pipeline tác tử viết bằng **Python (LangGraph + FastAPI)**; giao diện phòng nghiên cứu dùng Next.js.
+### Agentic RAG song ngữ, cho thấy toàn bộ quá trình
+
+Hỏi bằng **tiếng Việt hoặc tiếng Anh**. Một nhóm tác tử LangGraph lập kế hoạch, truy hồi, để tác tử phản biện kiểm tra độ phủ, rồi trả lời kèm **trích dẫn đã được kiểm tra** — trên một bộ dữ liệu công khai thật, mọi con số đều đo được.
 
 [![CI](https://github.com/nguyenddung/atlastrace-agentic-rag/actions/workflows/ci.yml/badge.svg)](https://github.com/nguyenddung/atlastrace-agentic-rag/actions/workflows/ci.yml)
-[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org)
-[![LangGraph](https://img.shields.io/badge/LangGraph-state_machine-1C3C3C?logo=langchain&logoColor=white)](https://langchain-ai.github.io/langgraph/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
+![LangGraph](https://img.shields.io/badge/LangGraph-agents-1C3C3C?logo=langchain&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![Dataset](https://img.shields.io/badge/data-XQuAD_EN%2BVI-2563eb)
 [![License: MIT](https://img.shields.io/badge/License-MIT-1a7f5a.svg)](LICENSE)
 
-**[Xem demo](https://atlastrace-ten.vercel.app)** · [Kết quả](#kết-quả) · [Kiến trúc](#kiến-trúc) · [Dữ liệu](#dữ-liệu) · [Chạy ở máy local](#chạy-ở-máy-local)
+**[Xem demo](https://atlastrace-ten.vercel.app)** · [Kết quả](#ket-qua) · [Đánh giá](#danh-gia) · [Kiến trúc](#kien-truc) · [Chạy ở máy local](#chay-local) · 🇬🇧 [English](README.md)
 
-> Bản demo chạy ở chế độ Demo: không cần API key, không lo hết quota. Hãy hỏi về một trong 48 chủ đề Wikipedia của XQuAD (Super Bowl 50, Nikola Tesla, Oxy, Thành Cát Tư Hãn, rừng Amazon…) bằng tiếng Việt hoặc tiếng Anh.
+<br>
+
+<img src="docs/screenshots/research-room-vi.png" alt="Phòng nghiên cứu AtlasTrace với câu hỏi tiếng Việt" width="900">
+
+</div>
 
 ---
 
-## Vấn đề
+## ✨ Điểm nổi bật
 
-RAG một lượt lấy vài đoạn văn rồi viết ra điều nghe hợp lý. Nó hiếm khi kiểm tra bằng chứng có thật sự bao phủ câu hỏi không, có thể trích dẫn đoạn văn chưa từng được truy hồi, và chất lượng giảm âm thầm khi câu hỏi bằng tiếng Việt mà nguồn bằng tiếng Anh.
+| | |
+| --- | --- |
+| 🌏 **Song ngữ nhờ chỉ mục** | Mỗi đoạn văn được lập chỉ mục bằng cả tiếng Anh và tiếng Việt. Câu hỏi tiếng Việt khớp thẳng với văn bản tiếng Việt: **Recall@5 97,3%**, so với **49,4%** nếu chỉ có chỉ mục tiếng Anh. |
+| 🔁 **Có tác tử phản biện** | Tác tử phản biện đo câu hỏi được bằng chứng bao phủ bao nhiêu, có thể yêu cầu một lượt truy hồi bổ sung, rồi chấm lại toàn bộ bằng chứng đã gộp. |
+| 🔒 **Trích dẫn được kiểm tra** | Mọi `[ID]` trong câu trả lời không nằm trong sổ bằng chứng đều bị loại và được đếm. |
+| 🙅 **Biết nói "không tìm thấy"** | Khi không đoạn nào bao phủ câu hỏi, hệ thống nói rõ và chỉ ra đoạn gần nhất thay vì đoán. |
+| 📏 **Đo thật, không viết sẵn** | Thời gian từng tác tử được đo, số vòng phản biện là số vòng thực chạy, và các con số trong README lấy từ `scripts/evaluate.py` trên 1.190 câu hỏi có nhãn. |
+| 🛟 **Chạy được không cần key** | Chế độ Demo hoàn toàn tất định. Chế độ Live dùng mô hình qua Vercel AI Gateway và tự quay về Demo khi có lỗi. |
 
-AtlasTrace làm cho từng lỗi đó hiện ra và đo được:
+---
 
-- **Tác tử phản biện** đo câu hỏi được bằng chứng bao phủ bao nhiêu và kích hoạt một lượt truy hồi bổ sung khi còn thiếu.
-- Mọi trích dẫn trong câu trả lời đều được **kiểm tra** với sổ bằng chứng; trích dẫn nằm ngoài sổ bị loại và được đếm.
-- Truy hồi **song ngữ nhờ chỉ mục**, nên câu hỏi tiếng Việt được phục vụ tốt ngang câu hỏi tiếng Anh.
-- Khi kho tri thức không có câu trả lời, hệ thống **nói rõ điều đó** thay vì đoán.
+<a id="ket-qua"></a>
 
-## Kết quả
+## 📊 Kết quả
 
-Đo bằng `python scripts/evaluate.py` trên toàn bộ **1.190 câu hỏi có nhãn của XQuAD** (báo cáo đầy đủ: [`eval/REPORT.md`](eval/REPORT.md)).
+Trên toàn bộ **1.190 câu hỏi có nhãn của XQuAD**, tách theo ngôn ngữ.
 
-| Truy hồi | Recall@1 | Recall@5 | MRR@10 |
+<table>
+<tr>
+<td width="50%" valign="top">
+
+**Truy hồi** (đoạn văn chuẩn)
+
+| | Recall@1 | Recall@5 | MRR@10 |
 | --- | --- | --- | --- |
-| Câu hỏi tiếng Anh → chỉ mục song ngữ | 88,2% | 97,7% | 0,922 |
-| Câu hỏi tiếng Việt → chỉ mục song ngữ | 89,2% | 97,0% | 0,925 |
-| Câu hỏi tiếng Việt → chỉ mục chỉ tiếng Anh (mốc so sánh) | 28,2% | 47,8% | 0,359 |
+| 🇬🇧 EN → chỉ mục song ngữ | **92,6%** | **98,6%** | 0,953 |
+| 🇻🇳 VI → chỉ mục song ngữ | **90,3%** | **97,3%** | 0,935 |
+| 🇻🇳 VI → chỉ mục chỉ tiếng Anh | 34,4% | 49,4% | 0,405 |
 
-| Toàn pipeline (chế độ Demo) | Trích đúng đoạn chuẩn đầu tiên | Đáp án nằm trong câu được trích | Kích hoạt vòng sửa sai | Độ trễ p50 |
-| --- | --- | --- | --- | --- |
-| Tiếng Anh | 91,3% | 73,0% | 37,6% | ~9 ms |
-| Tiếng Việt | 85,8% | 69,1% | 6,9% | ~11 ms |
+</td>
+<td width="50%" valign="top">
 
-Chỉ mục song ngữ giúp Recall@5 của câu hỏi tiếng Việt tăng khoảng gấp đôi so với chỉ mục chỉ tiếng Anh. Chỉ số *đáp án nằm trong câu được trích* được đo ở mức câu: đoạn đáp án chuẩn xuất hiện trong câu mà bộ tổng hợp tất định đã chọn.
+**Toàn pipeline** (chế độ Demo)
 
-## Kiến trúc
+| | 🇬🇧 EN | 🇻🇳 VI |
+| --- | --- | --- |
+| Trích đúng đoạn chuẩn đầu tiên | **92,5%** | **90,3%** |
+| Đoạn chuẩn có trong sổ bằng chứng | 96,7% | 96,4% |
+| Đáp án nằm trong câu được trích | 73,9% | 72,9% |
+| Độ trễ p50 | ~7 ms | ~9 ms |
 
-Một máy trạng thái LangGraph trong `atlastrace/graph.py`. Cả hai chế độ chạy cùng một đồ thị; chỉ phần cài đặt tác tử là khác.
+</td>
+</tr>
+</table>
+
+<p align="center">
+  <img src="eval/recall_at_k.svg" alt="Đường Recall@k cho câu hỏi tiếng Anh, tiếng Việt và tiếng Việt với chỉ mục chỉ tiếng Anh" width="720">
+</p>
+
+---
+
+<a id="danh-gia"></a>
+
+## 🧪 Đánh giá
+
+`python scripts/evaluate.py --write` chạy mọi câu hỏi có nhãn qua chỉ mục và qua toàn pipeline, rồi ghi [`eval/REPORT.md`](eval/REPORT.md), [`eval/report.json`](eval/report.json) và các biểu đồ. Pipeline Demo là tất định nên kết quả lặp lại chính xác (trừ độ trễ). CI chạy bản rút gọn 200 câu ở mỗi lần push.
+
+### Đo những gì
+
+| Chỉ số | Định nghĩa |
+| --- | --- |
+| **Recall@k / MRR@10** | Đoạn chuẩn có nằm trong top *k* của chỉ mục với câu hỏi gốc không; trung bình 1/thứ hạng |
+| **Trích đúng đoạn chuẩn đầu tiên** | Sau lập kế hoạch → truy hồi → phản biện, đoạn chuẩn đứng đầu sổ bằng chứng |
+| **Đáp án nằm trong câu được trích** | Đoạn đáp án chuẩn xuất hiện trong câu mà bộ tổng hợp chọn (đo ở mức câu, không phải khớp chính xác cụm từ) |
+| **Tỷ lệ vòng sửa sai** | Tỷ lệ câu hỏi mà tác tử phản biện yêu cầu truy hồi lần hai |
+| **Tỷ lệ "không tìm thấy"** | Mọi câu hỏi XQuAD đều có đáp án, nên đây là tỷ lệ báo nhầm (EN 3,1%, VI 0,1%) |
+
+### Ablation: mỗi thành phần đóng góp bao nhiêu
+
+<p align="center">
+  <img src="eval/ablation.svg" alt="Recall@1 theo từng biến thể truy hồi" width="720">
+</p>
+
+| Biến thể | 🇬🇧 Recall@1 | 🇻🇳 Recall@1 |
+| --- | --- | --- |
+| **BM25, trộn RRF qua các truy vấn** (mặc định) | **92,6%** | **90,3%** |
+| BM25 + vector băm, trọng số RRF bằng nhau | 88,2% | 89,2% |
+| Chỉ vector băm | 70,7% | 79,7% |
+| Mặc định nhưng bỏ bigram âm tiết | 92,9% | 87,9% |
+
+**Ba phát hiện định hình thiết kế**
+
+1. **Thành phần vector được đặt trọng số 0.** Trọng số trộn được chọn trên tập dev (24 bài viết đầu) và kiểm tra trên 24 bài còn lại: trọng số 0 cho Recall@1 **91,0% EN / 88,2% VI** trên nửa giữ lại, so với 87,5% / 87,5% khi trọng số bằng nhau. Vector băm chỉ là túi từ đã băm nên không có thông tin gì BM25 thiếu mà còn thêm va chạm băm. Vị trí này để dành cho embedding đa ngôn ngữ thật.
+2. **Bigram âm tiết chỉ có ích cho tiếng Việt.** Chúng tăng 2,4 điểm Recall@1 cho tiếng Việt (từ nhiều âm tiết như *đội thủ*, *bắt cóc*) và gần như không ảnh hưởng tiếng Anh.
+3. **Truy vấn "thực thể" đã bị bỏ khỏi bộ lập kế hoạch.** Khi được tính ngang các truy vấn khác trong RRF, nó đè nặng các từ viết hoa và kéo Recall@1 toàn pipeline tiếng Việt từ 90% xuống 80%.
+
+### Giới hạn
+
+- **Vòng sửa sai hiếm khi đổi câu trả lời trên XQuAD.** Ở 417 câu EN / 58 câu VI có kích hoạt vòng này, đoạn được trích không đổi: đoạn chuẩn gần như luôn nằm sẵn trong 6 đoạn đầu, và độ phủ thấp chủ yếu do diễn đạt khác. Vòng này chỉ tốn vài mili giây và dành cho kho dữ liệu mà bằng chứng nằm rải rác, cùng chế độ Live nơi mô hình tự quyết định còn thiếu gì.
+- **Phần lớn lỗi là đoạn liền kề** trong cùng bài viết (xem phân tích lỗi trong báo cáo). Bước tiếp theo là reranker dạng cross-encoder.
+- **Câu trả lời Demo là trích một câu.** Chế độ Live viết câu trả lời đầy đủ.
+
+---
+
+<a id="kien-truc"></a>
+
+## 🏗️ Kiến trúc
 
 ```mermaid
 flowchart LR
-    Q[Câu hỏi EN/VI] --> O[Điều phối]
-    O --> P[Lập kế hoạch]
-    P --> R[Truy hồi lai]
-    R --> C[Phản biện bằng chứng]
-    C -- thiếu độ phủ, vòng 1 --> R
+    Q([Câu hỏi · EN / VI]) --> O[Điều phối<br/>ngôn ngữ + ý định]
+    O --> P[Lập kế hoạch<br/>câu hỏi + từ khóa]
+    P --> R[Truy hồi<br/>BM25 · RRF · chỉ mục EN+VI]
+    R --> C{Phản biện<br/>độ phủ từ khóa}
+    C -- "< 75% · vòng 1" --> R
     C -- đủ --> S[Tổng hợp]
     S --> A[Kiểm tra trích dẫn]
-    A --> X[Câu trả lời + sổ bằng chứng]
+    A --> X([Câu trả lời + sổ bằng chứng])
 ```
 
-| Nút | Vai trò |
-| --- | --- |
-| **Điều phối** | Nhận diện ngôn ngữ và ý định của câu hỏi (người, thời gian, số lượng, địa điểm, lý do, dữ kiện) |
-| **Lập kế hoạch** | Demo: nguyên câu hỏi, các từ khóa chính và các thực thể. Live: 2–4 truy vấn do mô hình lập |
-| **Truy hồi lai** | BM25 + vector băm có trọng số IDF trên 480 tài liệu (240 đoạn × 2 ngôn ngữ), trộn bằng reciprocal rank fusion rồi gộp về mã đoạn văn |
-| **Phản biện** | Đo độ phủ từ khóa (có trọng số IDF) của từng đoạn và tổng thể; dưới 75% thì yêu cầu truy hồi bổ sung cho các từ còn thiếu, rồi **chấm lại toàn bộ bằng chứng đã gộp** |
-| **Tổng hợp** | Demo: chọn câu khớp nhất theo ngôn ngữ câu hỏi và hiện bản dịch tương ứng theo ngôn ngữ người đọc. Live: câu trả lời của mô hình, được Pydantic kiểm tra |
-| **Kiểm tra trích dẫn** | Xóa mọi `[ID]` không có trong sổ bằng chứng và báo số lượng đã xóa |
+Toàn bộ pipeline là một `StateGraph` của LangGraph trong [`atlastrace/graph.py`](atlastrace/graph.py). Demo và Live chạy cùng một đồ thị, chỉ khác phần cài đặt tác tử.
 
-Chế độ Live suy giảm êm ái: thiếu thông tin xác thực, lỗi cổng hoặc đầu ra sai schema đều được bắt lại, pipeline tất định hoàn tất lượt chạy và giao diện hiện thông báo `fallback` kèm lý do.
+| Nút | Chế độ Demo (tất định) | Chế độ Live (AI Gateway) |
+| --- | --- | --- |
+| **Điều phối** | Nhận diện ngôn ngữ và ý định (ai / khi nào / bao nhiêu / ở đâu / tại sao / dữ kiện) | như Demo |
+| **Lập kế hoạch** | Nguyên câu hỏi cộng các từ khóa chính | 2–4 truy vấn do mô hình lập |
+| **Truy hồi** | BM25 trên 480 tài liệu (240 đoạn × 2 ngôn ngữ), RRF qua các truy vấn, gộp về mã đoạn văn | như Demo |
+| **Phản biện** | Đo độ phủ từ khóa có trọng số IDF; dưới 75% thì yêu cầu truy hồi bổ sung | Mô hình chỉ ra góc nhìn còn thiếu |
+| **Tổng hợp** | Câu khớp nhất theo ngôn ngữ câu hỏi, hiển thị bằng ngôn ngữ người đọc nhờ căn chỉnh câu | Câu trả lời của mô hình, được Pydantic kiểm tra |
+| **Kiểm tra trích dẫn** | Loại trích dẫn nằm ngoài sổ bằng chứng và đếm số lượng | như Demo |
 
-**Không có gì viết sẵn:** thời gian từng bước đo bằng `perf_counter`, số vòng phản biện là số vòng đồ thị thực sự chạy, còn kết luận, câu trả lời và độ tin cậy đều tính từ các đoạn văn truy hồi được. Bộ test kiểm tra những tính chất này.
+---
 
-## Dữ liệu
+## 📚 Dữ liệu
 
-[XQuAD](https://github.com/google-deepmind/xquad) (Google DeepMind): 240 đoạn Wikipedia từ SQuAD v1.1 kèm 1.190 cặp câu hỏi–đáp án, được dịch chuyên nghiệp sang tiếng Việt và căn chỉnh theo từng đoạn. Chuyển đổi vào [`data/xquad/`](data/xquad/README.md) bằng `scripts/fetch_xquad.py`. Giấy phép dữ liệu: CC BY-SA 4.0 (mã nguồn dùng MIT).
+[**XQuAD**](https://github.com/google-deepmind/xquad) (Google DeepMind): 240 đoạn Wikipedia từ SQuAD v1.1 kèm 1.190 cặp câu hỏi–đáp án, được dịch chuyên nghiệp sang tiếng Việt và căn chỉnh theo từng đoạn, thuộc 48 chủ đề. `scripts/fetch_xquad.py` tải và chuyển đổi vào [`data/xquad/`](data/xquad/README.md). Giấy phép dữ liệu: CC BY-SA 4.0.
 
-## Chạy ở máy local
+---
+
+<a id="chay-local"></a>
+
+## 🚀 Chạy ở máy local
 
 ```bash
 git clone https://github.com/nguyenddung/atlastrace-agentic-rag.git
@@ -95,22 +174,22 @@ Mở <http://localhost:3000>. **Chế độ Demo không cần biến môi trư�
 
 | Lệnh | Tác dụng |
 | --- | --- |
-| `pytest` | Chạy bộ test Python |
-| `python scripts/evaluate.py --write` | Đánh giá đầy đủ, ghi `eval/report.json` và `eval/REPORT.md` |
+| `pytest` | 20 test: chất lượng truy hồi, kiểm tra trích dẫn, vòng sửa sai, fallback, chạy Live giả lập, API |
+| `python scripts/evaluate.py --write` | Đánh giá đầy đủ → `eval/REPORT.md`, `eval/report.json`, biểu đồ |
 | `python scripts/build_initial_results.py` | Tính lại kết quả hiển thị trước câu hỏi đầu tiên |
-| `npm run verify` | typecheck → lint → build cho giao diện web |
+| `npm run verify` | Kiểm tra kiểu → lint → build giao diện web |
 
-## Triển khai lên Vercel
+## ☁️ Triển khai lên Vercel
 
-Ứng dụng Next.js và hàm Python được triển khai cùng nhau. `vercel.json` định tuyến `/api/*` tới `api/index.py` và đóng gói `atlastrace/` cùng `data/xquad/`; Vercel tự cài `requirements.txt`. Để dùng Live AI, bật AI Gateway cho project — bản triển khai xác thực qua OIDC nên không cần lưu khóa.
+Ứng dụng Next.js và hàm Python được triển khai cùng nhau: `vercel.json` định tuyến `/api/*` tới `api/index.py` và đóng gói `atlastrace/` cùng `data/xquad/`; Vercel tự cài `requirements.txt`. Để dùng Live AI, bật AI Gateway cho project — bản triển khai xác thực qua OIDC nên không cần lưu khóa.
 
-## Đánh đổi và bước tiếp theo
+## 🛣️ Bước tiếp theo
 
-- **Truy hồi thiên về từ vựng.** BM25 cộng vector băm giúp demo nhẹ và tất định. Mô hình embedding đa ngôn ngữ sẽ giúp với câu hỏi diễn đạt khác, đặt sau cùng giao diện `HybridIndex.search`.
-- **Độ phủ chỉ là thước đo gần đúng.** Tín hiệu "không tìm thấy" dựa trên độ phủ từ khóa, bắt được câu hỏi lạc đề rõ ràng nhưng không phải mọi câu hỏi không có đáp án.
-- **Câu trả lời demo là trích xuất câu**, chưa phải trích đúng cụm đáp án.
-- **Tiếp theo:** một MCP server cung cấp công cụ `search_evidence` để tác tử khác dùng chỉ mục; stream tiến trình tác tử ở chế độ Live.
+- Embedding đa ngôn ngữ cho vị trí vector, tinh chỉnh lại trên tập dev
+- Reranker dạng cross-encoder cho các lỗi đoạn liền kề
+- MCP server cung cấp công cụ `search_evidence` để tác tử khác dùng chỉ mục
+- Stream tiến trình tác tử ở chế độ Live
 
 ## Giấy phép
 
-Mã nguồn: [MIT](LICENSE). Dữ liệu trong `data/xquad/`: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/legalcode).
+Mã nguồn: [MIT](LICENSE) · Dữ liệu trong `data/xquad/`: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/legalcode)

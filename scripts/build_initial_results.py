@@ -18,6 +18,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from atlastrace.graph import run_research  # noqa: E402
+from atlastrace.retrieval import get_index  # noqa: E402
+
+get_index()  # build the index first so the saved pipeline time does not include start-up
 
 samples = json.loads((ROOT / "lib" / "samples.json").read_text(encoding="utf-8"))
 results = {locale: run_research(questions[0], locale, "demo").model_dump(by_alias=True, exclude_none=True) for locale, questions in samples.items()}

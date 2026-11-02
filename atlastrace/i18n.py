@@ -6,8 +6,8 @@ MESSAGES: dict[str, dict[str, str]] = {
     "en": {
         "source": "Wikipedia · XQuAD",
         "orchestrator": "Detected a {q_lang_name} question asking for {intent}; routed it to the research team.",
-        "planner": "Planned {n_queries} retrieval paths: the full question, its key terms and its named entities.",
-        "retriever": "Fused BM25 and vector ranks over {n_docs} passages in English and Vietnamese; kept the top {n_hits}.",
+        "planner": "Planned {n_queries} retrieval paths: the full question and its key terms.",
+        "retriever": "Ranked {n_docs} passages in English and Vietnamese with BM25, fused across the planned queries; kept the top {n_hits}.",
         "retriever_corrective": "Corrective pass for missing terms ({missing}); added {n_new} new passage(s).",
         "critic_ok": "Accepted {n_accepted} passage(s) covering {coverage}% of the question terms.",
         "critic_gap": "Only {coverage}% of the question terms are covered; missing: {missing}. Requested a corrective retrieval.",
@@ -34,8 +34,8 @@ MESSAGES: dict[str, dict[str, str]] = {
     "vi": {
         "source": "Wikipedia · XQuAD",
         "orchestrator": "Nhận diện câu hỏi {q_lang_name} cần tìm {intent}; chuyển cho nhóm agent nghiên cứu.",
-        "planner": "Lập {n_queries} hướng truy hồi: nguyên câu hỏi, các từ khóa chính và các thực thể được nêu tên.",
-        "retriever": "Trộn thứ hạng BM25 và vector trên {n_docs} đoạn văn tiếng Anh và tiếng Việt; giữ {n_hits} đoạn đầu.",
+        "planner": "Lập {n_queries} hướng truy hồi: nguyên câu hỏi và các từ khóa chính.",
+        "retriever": "Xếp hạng {n_docs} đoạn văn tiếng Anh và tiếng Việt bằng BM25, trộn qua các truy vấn đã lập; giữ {n_hits} đoạn đầu.",
         "retriever_corrective": "Lượt truy hồi bổ sung cho các từ còn thiếu ({missing}); thêm {n_new} đoạn văn mới.",
         "critic_ok": "Chấp nhận {n_accepted} đoạn văn, bao phủ {coverage}% từ khóa của câu hỏi.",
         "critic_gap": "Mới bao phủ {coverage}% từ khóa của câu hỏi; còn thiếu: {missing}. Yêu cầu một lượt truy hồi bổ sung.",

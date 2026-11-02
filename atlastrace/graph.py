@@ -41,6 +41,7 @@ class State(TypedDict, total=False):
     success_criteria: list[str]
     hits: list[Hit]
     accepted_ids: list[str]
+    first_pass_accepted: list[str]  # kept so the evaluation can measure what the corrective loop changed
     coverage: float
     confidence: int
     missing: list[str]
@@ -140,6 +141,8 @@ def build_graph(index: HybridIndex) -> Any:
             else:
                 detail = i18n.t(locale, "critic_after", n_accepted=len(measured.accepted_ids), coverage=coverage)
 
+        if first_round:
+            update["first_pass_accepted"] = list(update["accepted_ids"])
         return {
             **update,
             "coverage": measured.coverage,

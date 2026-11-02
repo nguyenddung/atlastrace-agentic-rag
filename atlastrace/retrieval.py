@@ -1,9 +1,15 @@
-"""Hybrid retrieval: BM25 + hashed TF-IDF vectors, fused with reciprocal rank fusion.
+"""Retrieval: BM25 and hashed TF-IDF vectors, fused with weighted reciprocal rank fusion.
 
 Every passage is indexed twice, once per language. A Vietnamese question matches
 the Vietnamese text and an English question the English text, and the two hits
 collapse back onto one passage id. That is the whole cross-lingual trick: no
 translation at query time, because the corpus is already parallel.
+
+Fusion weights were chosen on a dev split (the first 24 XQuAD articles) by
+scripts/evaluate.py: on this dataset the feature-hashed vectors lower Recall@1
+at every weight tried, so the default gives them weight 0 and ranking is BM25
+fused across the planner's queries. The vector scorer stays behind the same
+interface as the ablation baseline and as the slot for learned embeddings.
 
 The index is built once per process (it takes well under a second for 480
 documents) and reused by every request.
@@ -13,7 +19,7 @@ from __future__ import annotations
 
 import math
 from collections import Counter
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from functools import lru_cache
 
@@ -21,6 +27,7 @@ from .corpus import Passage, load_passages
 from .text import tokenize
 
 RRF_K = 60
+DEFAULT_WEIGHTS = {"bm25": 1.0, "vector": 0.0}  # tuned on the dev split, see module docstring
 VECTOR_DIMS = 2048
 
 
@@ -42,12 +49,20 @@ def _hash(feature: str) -> int:
 
 
 class HybridIndex:
-    def __init__(self, passages: Iterable[Passage], langs: tuple[str, ...] = ("en", "vi"), k1: float = 1.5, b: float = 0.75):
+    def __init__(
+        self,
+        passages: Iterable[Passage],
+        langs: tuple[str, ...] = ("en", "vi"),
+        k1: float = 1.5,
+        b: float = 0.75,
+        tokenizer: Callable[[str], list[str]] = tokenize,
+    ):
         self.k1, self.b = k1, b
+        self.tokenize = tokenizer
         self.docs: list[tuple[Passage, str, Counter[str]]] = []
         for passage in passages:
             for lang in langs:
-                self.docs.append((passage, lang, Counter(tokenize(f"{passage.title} {passage.text(lang)}"))))
+                self.docs.append((passage, lang, Counter(tokenizer(f"{passage.title} {passage.text(lang)}"))))
 
         self.n_docs = len(self.docs)
         lengths = [sum(counts.values()) for _, _, counts in self.docs]
@@ -78,8 +93,12 @@ class HybridIndex:
                 score += self.idf[term] * tf * (self.k1 + 1) / denominator
         return score
 
-    def search(self, queries: list[str], limit: int = 6, exclude: Iterable[str] = ()) -> list[Hit]:
-        """Fuse every (query x scorer) ranking with RRF, then collapse languages onto passage ids."""
+    def search(self, queries: list[str], limit: int = 6, exclude: Iterable[str] = (), weights: dict[str, float] | None = None) -> list[Hit]:
+        """Fuse every (query x scorer) ranking with weighted RRF, then collapse languages onto passage ids.
+
+        ``weights`` lets the evaluation run ablations; the pipeline uses DEFAULT_WEIGHTS.
+        """
+        weights = DEFAULT_WEIGHTS if weights is None else weights
         excluded = set(exclude)
         rrf: dict[int, float] = {}
         bm25_best: dict[int, float] = {}
@@ -87,18 +106,23 @@ class HybridIndex:
         query_terms: set[str] = set()
 
         for query in queries:
-            terms = tokenize(query)
+            terms = self.tokenize(query)
             if not terms:
                 continue
             query_terms.update(terms)
             query_vector = self._vectorize(Counter(terms))
             bm25 = [self._bm25(terms, i) for i in range(self.n_docs)]
             vector = [sum(weight * self.vectors[i].get(slot, 0.0) for slot, weight in query_vector.items()) for i in range(self.n_docs)]
-            for scores, best in ((bm25, bm25_best), (vector, vector_best)):
+            for name, scores, best in (("bm25", bm25, bm25_best), ("vector", vector, vector_best)):
+                weight = weights.get(name, 0.0)
+                for i, score in enumerate(scores):
+                    if score > 0:
+                        best[i] = max(best.get(i, 0.0), score)
+                if weight <= 0:
+                    continue
                 ranked = sorted((i for i in range(self.n_docs) if scores[i] > 0), key=lambda i: scores[i], reverse=True)
                 for rank, i in enumerate(ranked):
-                    rrf[i] = rrf.get(i, 0.0) + 1 / (RRF_K + rank + 1)
-                    best[i] = max(best.get(i, 0.0), scores[i])
+                    rrf[i] = rrf.get(i, 0.0) + weight / (RRF_K + rank + 1)
 
         by_passage: dict[str, int] = {}
         for i, score in rrf.items():

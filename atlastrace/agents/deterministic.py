@@ -14,7 +14,6 @@ from ..retrieval import Hit, HybridIndex
 from ..text import STOP_WORDS, deaccent, split_sentences, tokenize, words
 
 WORD = re.compile(r"[^\W_]+(?:[-'’][^\W_]+)*", re.UNICODE)
-ENTITY = re.compile(r"\b(?:[A-ZÀ-Ỹ][\w'’-]*|\d[\d,.]*)(?:\s+(?:of\s+|the\s+|de\s+)?(?:[A-ZÀ-Ỹ][\w'’-]*|\d[\d,.]*))*")
 
 INTENT_PATTERNS = [
     ("quantity", r"\b(how many|how much|bao nhieu|may)\b"),
@@ -78,23 +77,16 @@ def content_words(question: str) -> list[str]:
     return kept
 
 
-def entities(question: str) -> list[str]:
-    found = []
-    for match in ENTITY.finditer(question):
-        phrase = match.group(0).strip()
-        # Skip a lone capitalised first word ("What", "Ai") that is just sentence case.
-        if match.start() == 0 and " " not in phrase and not phrase[0].isdigit():
-            continue
-        if deaccent(phrase.lower()) not in STOP_WORDS:
-            found.append(phrase)
-    return found
-
-
 def plan(question: str) -> Plan:
+    """The full question plus its key terms.
+
+    A third, entities-only query was tried and dropped: with every query weighted
+    equally in RRF it over-weights capitalised words and lowered pipeline
+    Recall@1 from 90% to 80% on Vietnamese questions (scripts/evaluate.py).
+    """
     keywords = " ".join(content_words(question))
-    named = " ".join(entities(question))
     queries: list[str] = []
-    for query in (question.strip(), keywords, named):
+    for query in (question.strip(), keywords):
         if query and query not in queries:
             queries.append(query)
     return Plan(intent=classify_intent(question), queries=queries, success_criteria=["cover every key term", "cite the passage that states the answer"])

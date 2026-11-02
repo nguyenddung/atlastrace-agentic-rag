@@ -8,8 +8,7 @@
     "confidence": 83,
     "queries": [
       "When did Carl Wilhelm Scheele discover oxygen?",
-      "Carl Wilhelm Scheele discover oxygen",
-      "Carl Wilhelm Scheele"
+      "Carl Wilhelm Scheele discover oxygen"
     ],
     "citations": [
       {
@@ -30,14 +29,14 @@
       },
       {
         "agent": "Query Planner",
-        "detail": "Planned 3 retrieval paths: the full question, its key terms and its named entities.",
+        "detail": "Planned 2 retrieval paths: the full question and its key terms.",
         "durationMs": 1,
         "status": "complete"
       },
       {
         "agent": "Hybrid Retriever",
-        "detail": "Fused BM25 and vector ranks over 240 passages in English and Vietnamese; kept the top 6.",
-        "durationMs": 7,
+        "detail": "Ranked 240 passages in English and Vietnamese with BM25, fused across the planned queries; kept the top 6.",
+        "durationMs": 5,
         "status": "complete"
       },
       {
@@ -57,7 +56,7 @@
       "documentsScanned": 240,
       "passagesRetrieved": 6,
       "critiqueRounds": 1,
-      "totalDurationMs": 221,
+      "totalDurationMs": 21,
       "queryCoverage": 95,
       "citationsRemoved": 0
     }
@@ -68,11 +67,10 @@
     "mode": "demo",
     "verdict": "Trả lời từ bài viết “Oxygen”",
     "answer": "Oxi được phát hiện độc lập bởi Carl Wilhelm Scheele, tại Uppsala, vào năm 1773 hay sớm hơn, và Joseph Priestley tại Wiltshire, vào năm 1774, nhưng Priestley thường được ưu tiên vì công trình của ông được xuất bản trước. [XQ-061]",
-    "confidence": 87,
+    "confidence": 86,
     "queries": [
       "Carl Wilhelm Scheele phát hiện ra oxi khi nào?",
-      "Carl Wilhelm Scheele phát hiện oxi",
-      "Carl Wilhelm Scheele"
+      "Carl Wilhelm Scheele phát hiện oxi"
     ],
     "citations": [
       {
@@ -93,20 +91,20 @@
       },
       {
         "agent": "Query Planner",
-        "detail": "Lập 3 hướng truy hồi: nguyên câu hỏi, các từ khóa chính và các thực thể được nêu tên.",
+        "detail": "Lập 2 hướng truy hồi: nguyên câu hỏi và các từ khóa chính.",
         "durationMs": 1,
         "status": "complete"
       },
       {
         "agent": "Hybrid Retriever",
-        "detail": "Trộn thứ hạng BM25 và vector trên 240 đoạn văn tiếng Anh và tiếng Việt; giữ 6 đoạn đầu.",
-        "durationMs": 6,
+        "detail": "Xếp hạng 240 đoạn văn tiếng Anh và tiếng Việt bằng BM25, trộn qua các truy vấn đã lập; giữ 6 đoạn đầu.",
+        "durationMs": 5,
         "status": "complete"
       },
       {
         "agent": "Evidence Critic",
         "detail": "Chấp nhận 1 đoạn văn, bao phủ 100% từ khóa của câu hỏi.",
-        "durationMs": 1,
+        "durationMs": 2,
         "status": "complete"
       },
       {
