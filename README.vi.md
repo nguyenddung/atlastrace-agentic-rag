@@ -119,6 +119,19 @@ Trên toàn bộ **1.190 câu hỏi có nhãn của XQuAD**, tách theo ngôn ng
 
 ---
 
+<a id="explainer"></a>
+
+## 🎬 Cách hoạt động qua hình ảnh
+
+Các khung hình từ video giới thiệu 77 giây ([xem file MP4](docs/explainer/atlastrace-explainer-vi.mp4), có lời đọc tiếng Việt). Số liệu lấy từ [`eval/report.json`](eval/report.json); các thanh độ phủ ở phần critic chỉ minh hoạ cách chấm điểm.
+
+<p align="center">
+  <img src="docs/explainer/explainer-1.png" alt="RAG cơ bản thất bại khi khác ngôn ngữ; chỉ mục song ngữ nâng Recall@1 từ 34,4% lên 90,3%; đội agent LangGraph" width="900">
+  <img src="docs/explainer/explainer-2.png" alt="Critic chấm độ phủ và từ chối câu hỏi ngoài kho; kiểm tra trích dẫn; kết quả và ablation" width="900">
+</p>
+
+---
+
 <a id="kien-truc"></a>
 
 ## 🏗️ Kiến trúc

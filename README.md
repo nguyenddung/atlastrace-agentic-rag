@@ -136,6 +136,19 @@ On all **1,190 labelled XQuAD questions**, per language.
 
 ---
 
+<a id="explainer"></a>
+
+## 🎬 How it works, in pictures
+
+Frames from a 77-second explainer video ([watch the MP4](docs/explainer/atlastrace-explainer-vi.mp4), narrated in Vietnamese). The numbers come from [`eval/report.json`](eval/report.json); the critic's coverage bars are an illustration of how scoring works.
+
+<p align="center">
+  <img src="docs/explainer/explainer-1.png" alt="Basic RAG fails across languages; bilingual index lifts Recall@1 from 34.4% to 90.3%; LangGraph agent team" width="900">
+  <img src="docs/explainer/explainer-2.png" alt="Critic coverage and out-of-corpus refusal; citation audit drops citations outside the ledger; results and ablation" width="900">
+</p>
+
+---
+
 <a id="architecture"></a>
 
 ## 🏗️ Architecture
