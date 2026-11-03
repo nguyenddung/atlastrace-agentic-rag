@@ -17,7 +17,7 @@ Sections of the report
 Usage:
     python scripts/evaluate.py                 # print the report
     python scripts/evaluate.py --write         # also write eval/report.json, eval/REPORT.md and eval/*.svg
-    python scripts/evaluate.py --limit 200     # quick run on the first 200 questions
+    python scripts/evaluate.py --limit 200     # quick run on an evenly spaced sample of 200 questions
 """
 
 from __future__ import annotations
@@ -371,7 +371,11 @@ def main() -> int:
     parser.add_argument("--write", action="store_true")
     args = parser.parse_args()
 
-    questions = load_questions()[: args.limit] if args.limit else load_questions()
+    questions = load_questions()
+    if args.limit and args.limit < len(questions):
+        # Evenly spaced sample so a quick run still covers both the dev and held-out articles.
+        step = len(questions) / args.limit
+        questions = [questions[int(i * step)] for i in range(args.limit)]
     bilingual = get_index(("en", "vi"))
     no_bigrams = HybridIndex(passages_by_id().values(), tokenizer=unigram_tokenize)
 
