@@ -14,7 +14,7 @@ Ask in **English or Vietnamese**. A LangGraph team of agents plans, retrieves, l
 ![Dataset](https://img.shields.io/badge/data-XQuAD_EN%2BVI-2563eb)
 [![License: MIT](https://img.shields.io/badge/License-MIT-1a7f5a.svg)](LICENSE)
 
-**[Live demo](https://atlastrace-ten.vercel.app)** · [Results](#results) · [Evaluation](#evaluation) · [Architecture](#architecture) · [Run locally](#run-locally) · 🇻🇳 [Tiếng Việt](README.vi.md)
+**[Live demo](https://atlastrace-rag.vercel.app)** · [Results](#results) · [Evaluation](#evaluation) · [Architecture](#architecture) · [Run locally](#run-locally) · 🇻🇳 [Tiếng Việt](README.vi.md)
 
 <br>
 

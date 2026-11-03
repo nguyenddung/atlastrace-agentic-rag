@@ -13,7 +13,7 @@ Hỏi bằng **tiếng Việt hoặc tiếng Anh**. Một nhóm tác tử LangGr
 ![Dataset](https://img.shields.io/badge/data-XQuAD_EN%2BVI-2563eb)
 [![License: MIT](https://img.shields.io/badge/License-MIT-1a7f5a.svg)](LICENSE)
 
-**[Xem demo](https://atlastrace-ten.vercel.app)** · [Kết quả](#ket-qua) · [Đánh giá](#danh-gia) · [Kiến trúc](#kien-truc) · [Chạy ở máy local](#chay-local) · 🇬🇧 [English](README.md)
+**[Xem demo](https://atlastrace-rag.vercel.app)** · [Kết quả](#ket-qua) · [Đánh giá](#danh-gia) · [Kiến trúc](#kien-truc) · [Chạy ở máy local](#chay-local) · 🇬🇧 [English](README.md)
 
 <br>
 
