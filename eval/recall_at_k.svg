@@ -1,0 +1,64 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 720 360' width='720' height='360' font-family='ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>
+<rect width='720' height='360' rx='14' fill='#ffffff' stroke='#e5e7eb'/>
+<text x='56' y='28' font-size='15' font-weight='600' fill='#12211d'>Recall@k of the gold passage (1,190 questions)</text>
+<line x1='56' x2='696' y1='312.0' y2='312.0' stroke='#e5e7eb'/>
+<text x='48' y='316.0' font-size='11' text-anchor='end' fill='#6b7280'>0%</text>
+<line x1='56' x2='696' y1='246.0' y2='246.0' stroke='#e5e7eb'/>
+<text x='48' y='250.0' font-size='11' text-anchor='end' fill='#6b7280'>25%</text>
+<line x1='56' x2='696' y1='180.0' y2='180.0' stroke='#e5e7eb'/>
+<text x='48' y='184.0' font-size='11' text-anchor='end' fill='#6b7280'>50%</text>
+<line x1='56' x2='696' y1='114.0' y2='114.0' stroke='#e5e7eb'/>
+<text x='48' y='118.0' font-size='11' text-anchor='end' fill='#6b7280'>75%</text>
+<line x1='56' x2='696' y1='48.0' y2='48.0' stroke='#e5e7eb'/>
+<text x='48' y='52.0' font-size='11' text-anchor='end' fill='#6b7280'>100%</text>
+<text x='56.0' y='330' font-size='11' text-anchor='middle' fill='#6b7280'>1</text>
+<text x='127.1' y='330' font-size='11' text-anchor='middle' fill='#6b7280'>2</text>
+<text x='198.2' y='330' font-size='11' text-anchor='middle' fill='#6b7280'>3</text>
+<text x='269.3' y='330' font-size='11' text-anchor='middle' fill='#6b7280'>4</text>
+<text x='340.4' y='330' font-size='11' text-anchor='middle' fill='#6b7280'>5</text>
+<text x='411.6' y='330' font-size='11' text-anchor='middle' fill='#6b7280'>6</text>
+<text x='482.7' y='330' font-size='11' text-anchor='middle' fill='#6b7280'>7</text>
+<text x='553.8' y='330' font-size='11' text-anchor='middle' fill='#6b7280'>8</text>
+<text x='624.9' y='330' font-size='11' text-anchor='middle' fill='#6b7280'>9</text>
+<text x='696.0' y='330' font-size='11' text-anchor='middle' fill='#6b7280'>10</text>
+<text x='376.0' y='350' font-size='11' text-anchor='middle' fill='#6b7280'>k (passages returned)</text>
+<polyline points='56.0,67.5 127.1,56.0 198.2,53.1 269.3,52.2 340.4,51.8 411.6,51.1 482.7,50.9 553.8,50.7 624.9,50.4 696.0,50.4' fill='none' stroke='#1a7f5a' stroke-width='2.5'/>
+<circle cx='56.0' cy='67.5' r='3' fill='#1a7f5a'/>
+<circle cx='127.1' cy='56.0' r='3' fill='#1a7f5a'/>
+<circle cx='198.2' cy='53.1' r='3' fill='#1a7f5a'/>
+<circle cx='269.3' cy='52.2' r='3' fill='#1a7f5a'/>
+<circle cx='340.4' cy='51.8' r='3' fill='#1a7f5a'/>
+<circle cx='411.6' cy='51.1' r='3' fill='#1a7f5a'/>
+<circle cx='482.7' cy='50.9' r='3' fill='#1a7f5a'/>
+<circle cx='553.8' cy='50.7' r='3' fill='#1a7f5a'/>
+<circle cx='624.9' cy='50.4' r='3' fill='#1a7f5a'/>
+<circle cx='696.0' cy='50.4' r='3' fill='#1a7f5a'/>
+<line x1='446' x2='468' y1='242' y2='242' stroke='#1a7f5a' stroke-width='3'/>
+<text x='476' y='246' font-size='12' fill='#12211d'>EN question → bilingual index</text>
+<polyline points='56.0,73.5 127.1,61.8 198.2,57.8 269.3,56.4 340.4,55.1 411.6,54.4 482.7,53.3 553.8,51.8 624.9,51.1 696.0,50.9' fill='none' stroke='#2563eb' stroke-width='2.5'/>
+<circle cx='56.0' cy='73.5' r='3' fill='#2563eb'/>
+<circle cx='127.1' cy='61.8' r='3' fill='#2563eb'/>
+<circle cx='198.2' cy='57.8' r='3' fill='#2563eb'/>
+<circle cx='269.3' cy='56.4' r='3' fill='#2563eb'/>
+<circle cx='340.4' cy='55.1' r='3' fill='#2563eb'/>
+<circle cx='411.6' cy='54.4' r='3' fill='#2563eb'/>
+<circle cx='482.7' cy='53.3' r='3' fill='#2563eb'/>
+<circle cx='553.8' cy='51.8' r='3' fill='#2563eb'/>
+<circle cx='624.9' cy='51.1' r='3' fill='#2563eb'/>
+<circle cx='696.0' cy='50.9' r='3' fill='#2563eb'/>
+<line x1='446' x2='468' y1='262' y2='262' stroke='#2563eb' stroke-width='3'/>
+<text x='476' y='266' font-size='12' fill='#12211d'>VI question → bilingual index</text>
+<polyline points='56.0,221.3 127.1,202.4 198.2,191.5 269.3,184.7 340.4,181.6 411.6,178.7 482.7,177.1 553.8,176.7 624.9,176.2 696.0,176.0' fill='none' stroke='#d97706' stroke-width='2.5' stroke-dasharray='6 5'/>
+<circle cx='56.0' cy='221.3' r='3' fill='#d97706'/>
+<circle cx='127.1' cy='202.4' r='3' fill='#d97706'/>
+<circle cx='198.2' cy='191.5' r='3' fill='#d97706'/>
+<circle cx='269.3' cy='184.7' r='3' fill='#d97706'/>
+<circle cx='340.4' cy='181.6' r='3' fill='#d97706'/>
+<circle cx='411.6' cy='178.7' r='3' fill='#d97706'/>
+<circle cx='482.7' cy='177.1' r='3' fill='#d97706'/>
+<circle cx='553.8' cy='176.7' r='3' fill='#d97706'/>
+<circle cx='624.9' cy='176.2' r='3' fill='#d97706'/>
+<circle cx='696.0' cy='176.0' r='3' fill='#d97706'/>
+<line x1='446' x2='468' y1='282' y2='282' stroke='#d97706' stroke-width='3' stroke-dasharray='6 5'/>
+<text x='476' y='286' font-size='12' fill='#12211d'>VI question → English-only index</text>
+</svg>

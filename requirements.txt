@@ -1,0 +1,4 @@
+fastapi>=0.115
+pydantic>=2.8
+langgraph>=0.2
+openai>=1.40

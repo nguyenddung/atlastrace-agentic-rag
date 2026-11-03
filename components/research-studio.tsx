@@ -3,7 +3,10 @@
 import { FormEvent, useEffect, useState } from "react";
 import { getDictionary } from "@/lib/i18n/dictionary";
 import { defaultLocale, locales, type Locale } from "@/lib/i18n/locale";
-import type { Citation, ResearchResult } from "@/lib/rag/types";
+import type { Citation, ResearchResult } from "@/lib/types";
+import report from "@/eval/report.json";
+
+const pct = (value: number) => `${(value * 100).toFixed(1)}%`;
 
 const agentMeta = {
   Orchestrator: { code: "OR", color: "violet" },
@@ -56,7 +59,6 @@ export function ResearchStudio({ initialResults }: { initialResults: Record<Loca
   const stanceLabels: Record<Citation["stance"], string> = {
     support: d.stanceSupport,
     context: d.stanceContext,
-    risk: d.stanceRisk,
   };
   const activeCitation = result.citations.find((citation) => citation.id === selectedSource) ?? result.citations[0];
 
@@ -154,10 +156,10 @@ export function ResearchStudio({ initialResults }: { initialResults: Record<Loca
           <aside className="pain-card">
             <div className="pain-card-top"><span>{d.briefLabel}</span><b>{d.briefStatus}</b></div>
             <h2>{d.briefQuestion}</h2>
-            <div className="conflict-row"><span>{d.briefOperations}</span><strong className="positive">{d.briefOperationsValue}</strong></div>
-            <div className="conflict-row"><span>{d.briefFinance}</span><strong>{d.briefFinanceValue}</strong></div>
-            <div className="conflict-row"><span>{d.briefData}</span><strong className="warning">{d.briefDataValue}</strong></div>
-            <div className="conflict-row"><span>{d.briefRisk}</span><strong className="danger">{d.briefRiskValue}</strong></div>
+            <div className="conflict-row"><span>{d.briefPassages}</span><strong>{report.n_passages} · 48</strong></div>
+            <div className="conflict-row"><span>{d.briefQuestions}</span><strong>{report.n_questions.toLocaleString(locale)}</strong></div>
+            <div className="conflict-row"><span>{d.briefRecall}</span><strong className="positive">{pct(report.retrieval.en["recall@5"])} / {pct(report.retrieval.vi["recall@5"])}</strong></div>
+            <div className="conflict-row"><span>{d.briefBaseline}</span><strong className="warning">{pct(report.retrieval.vi_en_only["recall@5"])}</strong></div>
             <p>{d.briefFooter}</p>
           </aside>
         </div>
@@ -250,7 +252,7 @@ export function ResearchStudio({ initialResults }: { initialResults: Record<Loca
               ))}
             </div>
             <div className="metric-row">
-              <div><span>{d.metricDocuments}</span><strong>{result.metrics.documentsScanned}</strong></div>
+              <div><span>{d.metricCoverage}</span><strong>{result.metrics.queryCoverage}%</strong></div>
               <div><span>{d.metricEvidence}</span><strong>{result.citations.length}</strong></div>
               <div><span>{d.metricRounds}</span><strong>{result.metrics.critiqueRounds}</strong></div>
               <div><span>{d.metricTime}</span><strong>{result.metrics.totalDurationMs < 1000 ? `${result.metrics.totalDurationMs} ms` : `${(result.metrics.totalDurationMs / 1000).toFixed(1)} s`}</strong></div>

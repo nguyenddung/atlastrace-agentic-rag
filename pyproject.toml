@@ -1,0 +1,17 @@
+[project]
+name = "atlastrace"
+version = "2.0.0"
+description = "Bilingual (EN/VI) evidence-first agentic RAG over XQuAD, with a LangGraph corrective loop."
+requires-python = ">=3.11"
+license = "MIT"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 160
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]  # long prompt and UI strings; the formatter handles code width

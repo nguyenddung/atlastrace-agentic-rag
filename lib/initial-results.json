@@ -1,0 +1,126 @@
+{
+  "en": {
+    "question": "When did Carl Wilhelm Scheele discover oxygen?",
+    "locale": "en",
+    "mode": "demo",
+    "verdict": "Answered from the “Oxygen” article",
+    "answer": "Oxygen was discovered independently by Carl Wilhelm Scheele, in Uppsala, in 1773 or earlier, and Joseph Priestley in Wiltshire, in 1774, but Priestley is often given priority because his work was published first. [XQ-061]",
+    "confidence": 83,
+    "queries": [
+      "When did Carl Wilhelm Scheele discover oxygen?",
+      "Carl Wilhelm Scheele discover oxygen"
+    ],
+    "citations": [
+      {
+        "id": "XQ-061",
+        "title": "Oxygen",
+        "source": "Wikipedia · XQuAD",
+        "excerpt": "Oxygen was discovered independently by Carl Wilhelm Scheele, in Uppsala, in 1773 or earlier, and Joseph Priestley in Wiltshire, in 1774, but Priestley is often given priority because his work was published first. The name oxygen was coined in 1777 by Antoine Lavoisier, whose experiments with oxygen helped to discredit the then-popular phlogiston theory of combustion and corrosion. Its name derives from the Greek roots ὀξύς oxys, \"acid\", literally \"sharp\", referring to the sour taste of acids and -γενής -genes, \"producer\", literally \"begetter\", because at the time of naming, it was mistakenly thought that all acids required oxygen in their composition. Common uses of oxygen includes the production cycle of steel, plastics and textiles, brazing, welding and cutting of steels and other metals, rocket propellant, in oxygen therapy and life support systems in aircraft, submarines, spaceflight and diving.",
+        "score": 100,
+        "stance": "support"
+      }
+    ],
+    "trace": [
+      {
+        "agent": "Orchestrator",
+        "detail": "Detected a English question asking for a date or time; routed it to the research team.",
+        "durationMs": 1,
+        "status": "complete"
+      },
+      {
+        "agent": "Query Planner",
+        "detail": "Planned 2 retrieval paths: the full question and its key terms.",
+        "durationMs": 1,
+        "status": "complete"
+      },
+      {
+        "agent": "Hybrid Retriever",
+        "detail": "Ranked 240 passages in English and Vietnamese with BM25, fused across the planned queries; kept the top 6.",
+        "durationMs": 5,
+        "status": "complete"
+      },
+      {
+        "agent": "Evidence Critic",
+        "detail": "Accepted 1 passage(s) covering 95% of the question terms.",
+        "durationMs": 1,
+        "status": "complete"
+      },
+      {
+        "agent": "Answer Synthesizer",
+        "detail": "Extracted the best-matching sentence and grounded it in 1 cited passage(s).",
+        "durationMs": 1,
+        "status": "complete"
+      }
+    ],
+    "metrics": {
+      "documentsScanned": 240,
+      "passagesRetrieved": 6,
+      "critiqueRounds": 1,
+      "totalDurationMs": 21,
+      "queryCoverage": 95,
+      "citationsRemoved": 0
+    }
+  },
+  "vi": {
+    "question": "Carl Wilhelm Scheele phát hiện ra oxi khi nào?",
+    "locale": "vi",
+    "mode": "demo",
+    "verdict": "Trả lời từ bài viết “Oxygen”",
+    "answer": "Oxi được phát hiện độc lập bởi Carl Wilhelm Scheele, tại Uppsala, vào năm 1773 hay sớm hơn, và Joseph Priestley tại Wiltshire, vào năm 1774, nhưng Priestley thường được ưu tiên vì công trình của ông được xuất bản trước. [XQ-061]",
+    "confidence": 86,
+    "queries": [
+      "Carl Wilhelm Scheele phát hiện ra oxi khi nào?",
+      "Carl Wilhelm Scheele phát hiện oxi"
+    ],
+    "citations": [
+      {
+        "id": "XQ-061",
+        "title": "Oxygen",
+        "source": "Wikipedia · XQuAD",
+        "excerpt": "Oxi được phát hiện độc lập bởi Carl Wilhelm Scheele, tại Uppsala, vào năm 1773 hay sớm hơn, và Joseph Priestley tại Wiltshire, vào năm 1774, nhưng Priestley thường được ưu tiên vì công trình của ông được xuất bản trước. Tên oxi được phát minh vào năm 1777 bởi Antoine Lavoisier, người có các thí nghiệm với oxi gây nghi vấn thuyết nhiệt tố về đốt lửa và ăn mòn nổi tiếng sau đó. Cái tên này bắt nguồn từ gốc Hy Lạp ὀξύς oxys, \"acid” (axit), \"sharp\" (sắc) theo nghĩa đen, đề cập đến vị chua của axít và -γενής -genes, \"chất sản xuất\", \"điều sinh ra\" theo nghĩa đen, vì tại thời điểm đặt tên, người ta quan niệm sai lầm rằng mọi axít đều cần có oxi trong thành phần cấu tạo của chúng. Các công dụng thông thường của oxi bao gồm ứng dụng trong chu trình sản xuất thép, nhựa và vải, hàn vảy, hàn và cắt thép và kim loại khác, chất đẩy tên lửa, trong liệu pháp oxi và hệ thống hỗ trợ sự sống trong máy bay, tàu ngầm, tàu vũ trụ và lặn.",
+        "score": 100,
+        "stance": "support"
+      }
+    ],
+    "trace": [
+      {
+        "agent": "Orchestrator",
+        "detail": "Nhận diện câu hỏi tiếng Việt cần tìm một mốc thời gian; chuyển cho nhóm agent nghiên cứu.",
+        "durationMs": 1,
+        "status": "complete"
+      },
+      {
+        "agent": "Query Planner",
+        "detail": "Lập 2 hướng truy hồi: nguyên câu hỏi và các từ khóa chính.",
+        "durationMs": 1,
+        "status": "complete"
+      },
+      {
+        "agent": "Hybrid Retriever",
+        "detail": "Xếp hạng 240 đoạn văn tiếng Anh và tiếng Việt bằng BM25, trộn qua các truy vấn đã lập; giữ 6 đoạn đầu.",
+        "durationMs": 5,
+        "status": "complete"
+      },
+      {
+        "agent": "Evidence Critic",
+        "detail": "Chấp nhận 1 đoạn văn, bao phủ 100% từ khóa của câu hỏi.",
+        "durationMs": 2,
+        "status": "complete"
+      },
+      {
+        "agent": "Answer Synthesizer",
+        "detail": "Trích câu khớp nhất và đặt câu trả lời trên nền 1 đoạn văn có dẫn nguồn.",
+        "durationMs": 1,
+        "status": "complete"
+      }
+    ],
+    "metrics": {
+      "documentsScanned": 240,
+      "passagesRetrieved": 6,
+      "critiqueRounds": 1,
+      "totalDurationMs": 10,
+      "queryCoverage": 100,
+      "citationsRemoved": 0
+    }
+  }
+}

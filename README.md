@@ -1,155 +1,216 @@
-# AtlasTrace — Multi-Agent Agentic RAG Decision Room
+<div align="center">
 
-🇻🇳 [Đọc bằng tiếng Việt](README.vi.md)
+# AtlasTrace
 
-An evidence-first Agentic RAG system that turns a contested business decision into an **auditable answer**: every recommendation shows the queries that were planned, the passages that were retrieved, the critique that rejected weak coverage, and the source behind each claim. The whole product runs in **English and Vietnamese** — including retrieval.
+### Bilingual agentic RAG that shows its work
+
+Ask in **English or Vietnamese**. A LangGraph team of agents plans, retrieves, lets a critic check coverage, and answers with **audited citations** — over a real public dataset, with every number measured.
 
 [![CI](https://github.com/nguyenddung/atlastrace-agentic-rag/actions/workflows/ci.yml/badge.svg)](https://github.com/nguyenddung/atlastrace-agentic-rag/actions/workflows/ci.yml)
-[![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
+![LangGraph](https://img.shields.io/badge/LangGraph-agents-1C3C3C?logo=langchain&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
+![Dataset](https://img.shields.io/badge/data-XQuAD_EN%2BVI-2563eb)
 [![License: MIT](https://img.shields.io/badge/License-MIT-1a7f5a.svg)](LICENSE)
 
-**[Live demo](https://atlastrace-ten.vercel.app)** · [The problem](#the-problem) · [Architecture](#architecture) · [Data source](#data-source) · [Run locally](#run-locally) · [Deploy](#deploy-to-vercel)
+**[Live demo](https://atlastrace-ten.vercel.app)** · [Results](#results) · [Evaluation](#evaluation) · [Architecture](#architecture) · [Run locally](#run-locally) · 🇻🇳 [Tiếng Việt](README.vi.md)
 
-> The live demo runs in Demo mode, so it needs no API keys and never hits a quota — open it and ask a question in English or Vietnamese.
+<br>
+
+<img src="docs/screenshots/research-room-en.png" alt="AtlasTrace research room: agent trace, grounded answer and evidence ledger" width="900">
+
+</div>
 
 ---
 
-## The problem
+## ✨ At a glance
 
-A fleet-rollout decision is not a search problem. Operations leaders have to reconcile evidence that lives in different systems and openly disagrees:
+| | |
+| --- | --- |
+| 🌏 **Bilingual by index** | Every passage is indexed in English *and* Vietnamese. A Vietnamese question hits Vietnamese text directly: **Recall@5 97.3%**, versus **49.4%** against an English-only index. |
+| 🔁 **A critic, not a single pass** | The critic measures how much of the question the evidence covers and can trigger a targeted second retrieval, then re-grades the merged evidence. |
+| 🔒 **Audited citations** | Any `[ID]` in the answer that is not in the evidence ledger is removed and counted. |
+| 🙅 **Says "not found"** | When no passage covers the question, it says so and shows the closest passage instead of guessing. |
+| 📏 **Measured, not canned** | Agent latencies are timed, critique rounds are the ones that ran, and the README numbers come from `scripts/evaluate.py` on 1,190 labelled questions. |
+| 🛟 **Works without keys** | Demo mode is fully deterministic. Live mode uses a hosted model via Vercel AI Gateway and falls back to Demo on any failure. |
 
-| Stakeholder | Evidence | Direction |
+---
+
+<a id="results"></a>
+
+## 📊 Results
+
+On all **1,190 labelled XQuAD questions**, per language.
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+**Retrieval** (gold passage)
+
+| | Recall@1 | Recall@5 | MRR@10 |
+| --- | --- | --- | --- |
+| 🇬🇧 EN → bilingual index | **92.6%** | **98.6%** | 0.953 |
+| 🇻🇳 VI → bilingual index | **90.3%** | **97.3%** | 0.935 |
+| 🇻🇳 VI → English-only index | 34.4% | 49.4% | 0.405 |
+
+</td>
+<td width="50%" valign="top">
+
+**Full pipeline** (Demo mode)
+
+| | 🇬🇧 EN | 🇻🇳 VI |
 | --- | --- | --- |
-| Operations | 18% less unplanned downtime in the pilot | supports |
-| Finance | €1.4M year-one cost, 19-month payback | supports |
-| Data Platform | 37% of the fleet below telemetry threshold | opposes |
-| Risk & Compliance | human approval required for safety work orders | constrains |
-| Legal | EU worker-privacy limits on telemetry | constrains |
+| Gold passage cited first | **92.5%** | **90.3%** |
+| Gold passage in ledger | 96.7% | 96.4% |
+| Answer in extracted sentence | 73.9% | 72.9% |
+| p50 latency | ~7 ms | ~9 ms |
 
-A single-pass RAG chatbot returns a plausible summary and quietly omits the counter-evidence. For a safety-relevant rollout, the team needs a **decision trail**: what was searched, what was selected, what was challenged, and which source grounds each claim.
+</td>
+</tr>
+</table>
 
-AtlasTrace makes that process visible.
+<p align="center">
+  <img src="eval/recall_at_k.svg" alt="Recall@k curves for English and Vietnamese questions, and Vietnamese questions against an English-only index" width="720">
+</p>
 
-## What makes it *agentic*
+---
 
-Four specialized agents in a corrective loop — not one prompt wrapped around vector search.
+<a id="evaluation"></a>
+
+## 🧪 Evaluation
+
+`python scripts/evaluate.py --write` runs every labelled question through the index and the full pipeline and writes [`eval/REPORT.md`](eval/REPORT.md), [`eval/report.json`](eval/report.json) and the charts. The Demo pipeline is deterministic, so the numbers reproduce exactly (latency aside). CI runs a 200-question smoke version on every push.
+
+### What is measured
+
+| Metric | Definition |
+| --- | --- |
+| **Recall@k / MRR@10** | Is the gold passage in the index's top *k* for the raw question; mean of 1/rank |
+| **Gold passage cited first** | After plan → retrieve → critique, the gold passage leads the evidence ledger |
+| **Answer in extracted sentence** | The gold answer span appears in the sentence the synthesizer chose (sentence-level, not exact span) |
+| **Corrective loop rate** | Share of questions where the critic asked for a second retrieval |
+| **Not-found rate** | Share flagged unanswerable. Every XQuAD question is answerable, so this is a false-negative rate (EN 3.1%, VI 0.1%) |
+
+### Ablations: what each component is worth
+
+<p align="center">
+  <img src="eval/ablation.svg" alt="Recall@1 for BM25, BM25 plus hashed vectors, vectors only, and BM25 without bigrams" width="720">
+</p>
+
+| Variant | 🇬🇧 Recall@1 | 🇻🇳 Recall@1 |
+| --- | --- | --- |
+| **BM25 with RRF across planned queries** (default) | **92.6%** | **90.3%** |
+| BM25 + feature-hashed vectors, equal RRF weight | 88.2% | 89.2% |
+| Feature-hashed vectors only | 70.7% | 79.7% |
+| Default without syllable bigrams | 92.9% | 87.9% |
+
+**Three findings that shaped the design**
+
+1. **The vector component was given weight 0.** The fusion weight was chosen on a dev split (first 24 articles) and checked on the held-out 24: weight 0 gives Recall@1 **91.0% EN / 88.2% VI** on the held-out half, versus 87.5% / 87.5% with equal weights. Feature-hashed vectors are a bag of hashed terms, so they add collisions and no information BM25 lacks. The slot stays in the interface for learned multilingual embeddings.
+2. **Syllable bigrams matter for Vietnamese only.** They add 2.4 points of Recall@1 for Vietnamese (multi-syllable words like *đội thủ*, *bắt cóc*) and are neutral for English.
+3. **An "entities" query was removed from the planner.** Weighted equally in RRF, it over-weighted capitalised words and cut Vietnamese pipeline Recall@1 from 90% to 80%.
+
+### Honest limits
+
+- **The corrective loop rarely changes the answer on XQuAD.** On the 417 EN / 58 VI questions where it fired, the cited passage was the same before and after: the gold passage is almost always in the first six already, and low coverage mostly reflects paraphrase. It costs a few milliseconds and is there for corpora where evidence is spread out, and for Live mode, where a model decides what is missing.
+- **Misses are mostly neighbouring paragraphs** of the same article (see the error analysis in the report). A cross-encoder reranker is the next step.
+- **Demo answers are extractive** (one sentence). Live mode writes a full answer.
+
+<details>
+<summary><b>Accuracy by question type</b></summary>
+
+<br>
+
+| Intent | 🇬🇧 n | 🇬🇧 cited first | 🇬🇧 answer hit | 🇻🇳 n | 🇻🇳 cited first | 🇻🇳 answer hit |
+| --- | --- | --- | --- | --- | --- | --- |
+| person | 146 | 95.2% | 69.2% | 138 | 92.0% | 66.7% |
+| time | 131 | 90.1% | 77.1% | 117 | 89.7% | 76.1% |
+| quantity | 105 | 95.2% | 83.8% | 156 | 92.9% | 73.7% |
+| place | 45 | 93.3% | 77.8% | 32 | 96.9% | 68.8% |
+| reason | 15 | 100.0% | 60.0% | 15 | 100.0% | 60.0% |
+| fact | 748 | 91.8% | 73.0% | 732 | 89.1% | 73.8% |
+
+</details>
+
+---
+
+<a id="architecture"></a>
+
+## 🏗️ Architecture
 
 ```mermaid
 flowchart LR
-    Q[Decision query] --> O[Orchestrator]
-    O --> P[Planner agent]
-    P --> R[Hybrid retriever]
-    R --> C[Evidence critic]
-    C -- coverage gap --> R
-    C -- sufficient evidence --> S[Answer synthesizer]
-    S --> A[Cited recommendation]
+    Q([Question · EN / VI]) --> O[Orchestrator<br/>language + intent]
+    O --> P[Planner<br/>question + key terms]
+    P --> R[Retriever<br/>BM25 · RRF · EN+VI index]
+    R --> C{Evidence critic<br/>term coverage}
+    C -- "< 75% · round 1" --> R
+    C -- covered --> S[Synthesizer]
+    S --> A[Citation audit]
+    A --> X([Answer + evidence ledger])
 ```
 
-| Stage | Responsibility | Typed output |
+The whole pipeline is a LangGraph `StateGraph` in [`atlastrace/graph.py`](atlastrace/graph.py). Demo and Live run the same graph; only the agents differ.
+
+| Node | Demo mode (deterministic) | Live mode (AI Gateway) |
 | --- | --- | --- |
-| **Orchestrator** | Classifies the query, records every handoff and duration | `AgentTrace[]` |
-| **Planner agent** | Decomposes the decision into benefit, readiness, cost, governance and counter-evidence queries | `{ intent, queries, successCriteria }` |
-| **Hybrid retriever** | BM25 + concept-expanded feature vectors, merged with reciprocal rank fusion | `RetrievedDocument[]` |
-| **Evidence critic** | Grades relevance, source diversity and risk coverage; can trigger a **corrective second retrieval** | `{ acceptedIds, confidence, critique, missingPerspective }` |
-| **Answer synthesizer** | Receives only accepted evidence; must cite exact document IDs | `{ answer, citedIds, confidence }` |
+| **Orchestrator** | Detects language and intent (who / when / how many / where / why / fact) | same |
+| **Planner** | The full question plus its key terms | 2–4 model-planned queries |
+| **Retriever** | BM25 over 480 documents (240 passages × 2 languages), RRF across queries, collapsed onto passage ids | same |
+| **Evidence critic** | IDF-weighted term coverage per passage; accepts passages clearing a rank and a coverage bar; requests a corrective retrieval below 75% | Model critic names a missing perspective |
+| **Synthesizer** | Best sentence in the question's language, shown in the reader's language via sentence alignment | Model answer, Pydantic-validated |
+| **Citation audit** | Strips citations outside the ledger and counts them | same |
 
-The critic is what makes the loop corrective: when it reports a `missingPerspective`, retrieval runs again with that perspective appended before synthesis is allowed to start.
+<details>
+<summary><b>More screenshots</b></summary>
 
-### Two execution modes
+<br>
 
-| Mode | How it runs | Why it exists |
-| --- | --- | --- |
-| **Demo** (default) | Deterministic planning, retrieval, evidence selection and citation contract — no network, no keys | A recruiter can open the live URL and get a real answer instantly, with zero API quota |
-| **Live AI** | Three typed `ToolLoopAgent` instances through Vercel AI Gateway | Shows the real multi-agent pipeline with a hosted model |
-
-Live mode degrades gracefully: any gateway error is caught, the deterministic pipeline completes the run, and the UI shows a `fallback` banner with the reason instead of an error page.
-
-## Highlights
-
-- A decision workspace, not a generic chat UI
-- Visible query decomposition and agent handoffs with per-stage latency
-- Hybrid lexical + vector retrieval with reciprocal rank fusion
-- Corrective critique loop with explicit counter-evidence coverage
-- Clickable source-level citations with `support` / `context` / `risk` stance labels
-- Graceful degradation from Live AI to a deterministic pipeline
-- Fully bilingual EN/VI — interface, answers, evidence ledger **and retrieval**
-- Typed API boundary with Zod validation, unit tests, CI, and production deployment
-- Responsive down to mobile
-- Per-IP rate limiting on the research endpoint, plus generated favicon, OG image, robots.txt and sitemap
-
-## Bilingual, including retrieval
-
-Translating the interface is the easy half. The hard half is that **BM25 scores exact terms**, so a Vietnamese question against an English corpus retrieves noise — a language toggle that only relabels buttons would quietly produce worse answers in one of its two languages.
-
-Three approaches were available:
-
-| Approach | Why not |
+| Vietnamese question, Vietnamese interface | Out-of-corpus question |
 | --- | --- |
-| Translate the corpus | Breaks lexical scoring — you cannot BM25 a Vietnamese query against Vietnamese text and an English query against English text from one index |
-| Add a second multilingual embedding index | Real answer at scale, but a heavy dependency for an 8-document corpus, and it drops the deterministic zero-key demo |
-| Bridge the query into one concept space | Keeps a single index, stays deterministic, and is honest about its limits |
+| <img src="docs/screenshots/research-room-vi.png" width="480"> | <img src="docs/screenshots/not-found.png" width="380"> |
 
-AtlasTrace takes the third. `lib/rag/language-bridge.ts` folds Vietnamese tone marks and the `đ` glyph, then maps decision vocabulary onto the English concepts the retriever already indexes:
+<img src="docs/screenshots/hero.png" width="900">
 
-```text
-"triển khai"  → rollout deploy launch
-"chi phí"     → cost investment
-"kiểm soát"   → control governance oversight
+</details>
+
+---
+
+## 📚 Dataset
+
+[**XQuAD**](https://github.com/google-deepmind/xquad) (Google DeepMind): 240 Wikipedia paragraphs from SQuAD v1.1 with 1,190 question/answer pairs, professionally translated into Vietnamese and aligned paragraph-for-paragraph. 48 topics, from Super Bowl 50 and Nikola Tesla to the Yuan dynasty and the Amazon rainforest.
+
+`scripts/fetch_xquad.py` downloads and converts it into [`data/xquad/`](data/xquad/README.md). Data license: CC BY-SA 4.0.
+
+---
+
+<a id="run-locally"></a>
+
+## 🚀 Run locally
+
+```bash
+git clone https://github.com/nguyenddung/atlastrace-agentic-rag.git
+cd atlastrace-agentic-rag
+
+python -m venv .venv && . .venv/bin/activate
+pip install -r requirements-dev.txt
+npm install
+
+npm run dev:api   # FastAPI on :8000
+npm run dev       # Next.js on :3000 (proxies /api/* to :8000)
 ```
 
-Mappings are multi-syllable phrases only — a lone Vietnamese syllable is far too ambiguous to map safely. An English question contains no Vietnamese phrase, so it is bridged to itself unchanged and existing behaviour is untouched.
+Open <http://localhost:3000>. **Demo mode needs no environment variables.** For Live AI, copy `.env.example` to `.env.local` and set `AI_GATEWAY_API_KEY`.
 
-What is localized where:
-
-| Layer | Language handling |
+| Command | What it does |
 | --- | --- |
-| Retrieval index (`lib/rag/corpus.ts`) | Stays English — this is what BM25 scores |
-| Query | Bridged into the English concept space before tokenizing |
-| Evidence ledger, answers, verdicts, agent traces | Rendered from the reader's locale |
-| Interface strings | `lib/i18n/dictionary.ts`, one typed dictionary per locale |
-
-Both locales are server-rendered on first load, so the toggle is instant. Once the reader asks their own question, switching language re-runs it rather than showing a stale answer in the wrong language.
-
-## Architecture
-
-```text
-app/
-├── api/research/route.ts       # Zod-validated, rate-limited research endpoint (POST)
-├── layout.tsx                  # metadata, fonts
-├── page.tsx                    # server-rendered initial decision
-├── icon.tsx / opengraph-image.tsx  # generated favicon and social preview image
-├── robots.ts / sitemap.ts      # generated SEO files
-└── globals.css                 # design system
-components/
-└── research-studio.tsx         # the observable decision room
-lib/
-├── agents/research-team.ts     # planner, critic, synthesizer, orchestration
-├── rate-limit.ts                # in-memory per-IP fixed-window limiter
-├── site.ts                      # canonical site URL, shared by metadata/robots/sitemap
-├── i18n/
-│   ├── locale.ts               # Locale type and guards
-│   ├── dictionary.ts           # typed EN/VI interface strings
-│   └── corpus-vi.ts            # Vietnamese presentation layer for the corpus
-└── rag/
-    ├── corpus.ts               # synthetic Northstar knowledge base (8 docs, English)
-    ├── retrieval.ts            # BM25 + feature-hashed vectors + RRF
-    ├── language-bridge.ts      # Vietnamese → English concept bridge
-    ├── deterministic.ts        # no-key pipeline, planning and classification
-    ├── types.ts                # shared pipeline types
-    └── retrieval.test.ts       # retrieval, citation and cross-lingual invariants
-```
-
-The corpus is deliberately **synthetic**. It models a realistic internal knowledge base without exposing proprietary information or implying that the company, metrics or documents are real.
-
-## Data source
-
-There is no external dataset, database or scraper behind this project. The entire knowledge base is a small set of hand-authored, synthetic documents checked directly into the repo:
-
-- [`lib/rag/corpus.ts`](lib/rag/corpus.ts) — 8 English documents (`OPS-17`, `FIN-08`, `RISK-12`, `LEGAL-04`, `ENG-23`, `DATA-05`, `SRE-19`, `PEOPLE-03`), each with an id, title, source, date, tags, a `support` / `context` / `risk` stance, and a text passage. This is the exact array that `retrieveHybrid` indexes and scores — nothing is fetched at runtime.
-- [`lib/i18n/corpus-vi.ts`](lib/i18n/corpus-vi.ts) — Vietnamese translations of the same 8 documents, keyed by the same ids. These are display-only: retrieval always scores the English text above, and this file only changes what a Vietnamese reader sees in the evidence ledger.
-
-Everything in the corpus is fictional — no real company, employee or proprietary figure is represented; "Northstar" and "FleetSense" are invented names for a synthetic fleet-maintenance scenario. To point this project at real data, implement a store with the same `retrieveHybrid(question, plannedQueries, limit)` signature (see [Trade-offs and next steps](#trade-offs-and-next-steps)) — the agents, API and UI don't need to change.
+| `pytest` | 20 tests: retrieval quality, citation audit, corrective loop, fallback, a stubbed live run, API |
+| `python scripts/evaluate.py --write` | Full evaluation → `eval/REPORT.md`, `eval/report.json`, charts |
+| `python scripts/build_initial_results.py` | Re-computes the result shown before the first question |
+| `python scripts/fetch_xquad.py` | Re-downloads and converts XQuAD |
+| `npm run verify` | Web typecheck → lint → build |
 
 ### API
 
@@ -157,89 +218,49 @@ Everything in the corpus is fictional — no real company, employee or proprieta
 POST /api/research
 Content-Type: application/json
 
-{ "question": "Northstar có nên triển khai bảo trì dự đoán cho toàn đội xe EU không?",
-  "mode": "demo",
-  "locale": "vi" }
+{ "question": "Ai đã bắt cóc người vợ đầu của Thiết Mộc Chân?", "mode": "demo", "locale": "vi" }
 ```
 
-`question` must be 12–500 characters. `mode` is `"demo"` or `"live"`. `locale` is `"en"` or `"vi"` and defaults to `"en"`. The response is a `ResearchResult`: verdict, answer, confidence, planned queries, citations, per-agent trace and pipeline metrics — all in the requested locale. Validation errors come back localized too. Requests are rate-limited per IP (20/min); an exceeded limit returns `429` with a `Retry-After` header.
+Returns the verdict, answer, confidence, planned queries, evidence ledger, per-agent trace and metrics (`queryCoverage`, `critiqueRounds`, `citationsRemoved`, …) in the requested locale. Rate-limited to 20 requests/min per client (`429` + `Retry-After`). Interactive docs at `/api/docs`.
 
-## Run locally
+<details>
+<summary><b>Project layout</b></summary>
 
-```bash
-git clone https://github.com/nguyenddung/atlastrace-agentic-rag.git
-cd atlastrace-agentic-rag
-npm install
-npm run dev
+```text
+atlastrace/                 Python package
+  text.py                   EN/VI normalisation: deaccenting, stop words, syllable bigrams
+  corpus.py                 Loads passages and labelled questions
+  retrieval.py              BM25 + vector index, weighted RRF, language collapse
+  agents/deterministic.py   Demo planner, critic, synthesizer
+  agents/llm.py             Live agents through AI Gateway
+  graph.py                  LangGraph pipeline, citation audit, result assembly
+  api.py                    FastAPI: POST /api/research, GET /api/health
+api/index.py                Vercel Python function entrypoint
+scripts/                    fetch_xquad · evaluate · build_initial_results
+eval/                       Generated report, JSON and charts
+tests/                      pytest suite
+app/ components/ lib/       Next.js research room
 ```
 
-Open <http://localhost:3000>. **Demo mode needs no environment variables.**
+</details>
 
-To use Live AI outside Vercel, copy `.env.example` to `.env.local` and set a key:
+---
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `AI_GATEWAY_API_KEY` | Live mode only, outside Vercel | Vercel AI Gateway credential. Vercel deployments authenticate via OIDC automatically |
-| `RESEARCH_MODEL_ID` | No | Swap the model behind all three agents, e.g. `anthropic/claude-opus-5` |
-| `NEXT_PUBLIC_SITE_URL` | No | Canonical URL for metadata; inferred from `VERCEL_PROJECT_PRODUCTION_URL` on Vercel |
+## ☁️ Deploy to Vercel
 
-### Scripts
+The Next.js app and the Python function deploy together: `vercel.json` routes `/api/*` to `api/index.py` and bundles `atlastrace/` and `data/xquad/` with it, and Vercel installs `requirements.txt`. For Live AI, enable AI Gateway on the project; deployments authenticate via OIDC, so no key needs to be stored.
 
-| Command | What it does |
-| --- | --- |
-| `npm run dev` | Development server |
-| `npm run build` / `npm start` | Production build and server |
-| `npm run typecheck` | `tsc --noEmit`, strict mode |
-| `npm test` | Vitest unit suite |
-| `npm run lint` | ESLint (`eslint-config-next`) |
-| `npm run verify` | typecheck → test → lint → build, the same gate CI runs |
+## 🛣️ Next steps
 
-## Evaluation strategy
+- Multilingual embeddings in the vector slot, re-tuned on the dev split
+- A cross-encoder reranker for the neighbouring-paragraph misses
+- An MCP server exposing `search_evidence`, so other agents can use the index
+- Streaming the agent trace in Live mode
 
-The automated suite protects four invariants that matter more than snapshot tests:
+## 📝 Summary
 
-1. Rollout questions generate readiness, risk **and** financial retrieval paths.
-2. Retrieval surfaces both supporting evidence and counter-evidence.
-3. **Every rendered citation exists in the evidence ledger** — no fabricated document IDs.
-4. Production-control questions return control-specific evidence.
-5. A Vietnamese question classifies identically to its English twin.
-6. The bridge is load-bearing: raw Vietnamese tokens carry nothing the English index can score, bridged tokens do.
-7. A Vietnamese question retrieves substantially the same evidence, with both supporting and counter-evidence present.
-8. Localized runs keep verdict, answer, ledger and agent trace in one language, with citations still valid.
-
-The UI surfaces the metrics that would become an offline evaluation set in a production system: evidence coverage, source diversity, citation validity, corrective rounds, grounded confidence and end-to-end latency.
-
-`.github/workflows/ci.yml` runs typecheck, tests, lint and build on every push and pull request.
-
-## Deploy to Vercel
-
-This repository is deployed at **[atlastrace-ten.vercel.app](https://atlastrace-ten.vercel.app)**. To deploy your own copy:
-
-1. Push this repository to GitHub.
-2. In Vercel, **Add New → Project** and import `nguyenddung/atlastrace-agentic-rag`.
-3. Accept the detected Next.js settings — no environment variables are needed for Demo mode.
-4. For Live AI, enable AI Gateway on the project; deployments authenticate via OIDC, so no key needs to be stored.
-
-Every push to `main` then ships a new production deployment.
-
-## Trade-offs and next steps
-
-- **In-memory corpus.** Deliberate, so the demo runs anywhere with zero setup. A production version would ingest versioned documents into Postgres/pgvector or a managed vector store behind the same `retrieveHybrid` interface.
-- **Feature-hashed vectors.** Concept expansion plus feature hashing keeps the demo deterministic and dependency-light. Real embeddings drop in behind the same retriever interface without touching the agents.
-- **The bridge is a dictionary, not a translator.** It covers the decision vocabulary this corpus is about. Vietnamese outside that domain falls back to whatever tokens survive, and the honest fix at scale is a multilingual embedding index behind the same `retrieveHybrid` interface.
-- **Rate limiting is in-memory, not durable.** `/api/research` enforces a per-IP fixed window (`lib/rate-limit.ts`), but state resets on cold start and is not shared across serverless instances. It blunts casual abuse of the public demo; real production traffic needs a durable, shared store (Vercel KV, Upstash) behind the same interface.
-- **Next evaluation milestone.** A labeled decision-query set scored on retrieval recall@k, citation precision, faithfulness and answer completeness.
-
-## Summary
-
-> Built and deployed a multi-agent Agentic RAG decision-support system with Next.js, the Vercel AI SDK and AI Gateway. Implemented query planning, BM25/vector hybrid retrieval with reciprocal rank fusion, an evidence-critique retry loop, grounded synthesis with citation auditing, deterministic fallback, cross-lingual EN/VI retrieval, and an observable UI — with strict TypeScript, unit tests and CI.
-
-## Star history
-
-If this project is useful to you, a star helps others find it.
-
-[![Star History Chart](https://api.star-history.com/svg?repos=nguyenddung/atlastrace-agentic-rag&type=Date)](https://star-history.com/#nguyenddung/atlastrace-agentic-rag&Date)
+> Built and deployed a bilingual (EN/VI) agentic RAG system in Python with LangGraph and FastAPI over the public XQuAD dataset: a bilingual BM25 index with reciprocal rank fusion, a coverage-measuring critic with a corrective retrieval loop, citation auditing and a deterministic fallback for the live model path. Evaluated on 1,190 labelled questions with a dev/held-out split for tuning: Recall@5 98.6% (EN) and 97.3% (VI), versus 49.4% for Vietnamese against an English-only index.
 
 ## License
 
-[MIT](LICENSE)
+Code: [MIT](LICENSE) · Data in `data/xquad/`: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/legalcode)

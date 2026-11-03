@@ -23,3 +23,11 @@
 # misc
 *.log
 .DS_Store
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+data/xquad/raw/
